@@ -6,7 +6,8 @@ from django.db import models
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
-from account.models import TagModel, CategoryModel, MoneyAccountModel
+from account.models import TagModel, CategoryModel
+from account.models.account import MoneyAccountModel
 from account.models.base import CurrencyModel
 
 
@@ -26,7 +27,12 @@ class BaseExpenseModel(models.Model):
 
     account = models.ForeignKey(MoneyAccountModel, on_delete=models.CASCADE)
     counterparty_account = models.ForeignKey(
-        MoneyAccountModel, on_delete=models.CASCADE, null=True, blank=True, default=None
+        MoneyAccountModel,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="move_expenses_%(class)ss",
     )
 
     @property
