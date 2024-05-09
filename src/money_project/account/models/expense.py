@@ -20,7 +20,7 @@ class BaseExpenseModel(models.Model):
     description = models.TextField(null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
-    tag = models.ManyToManyField(TagModel)
+    tag = models.ManyToManyField(TagModel, blank=True)
     category = models.ForeignKey(
         CategoryModel, on_delete=models.SET_NULL, null=True, blank=True, default=None
     )
