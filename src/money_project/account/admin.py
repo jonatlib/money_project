@@ -1,11 +1,10 @@
 from django.contrib import admin
 
-from models import (
-    BaseExpenseModel,
-    CategoryModel,
-    CurrencyModel,
+from account.models import (
     ExtraExpenseModel,
     RegularExpenseModel,
+    CategoryModel,
+    CurrencyModel,
     TagModel,
     ManualAccountStateModel,
     MoneyAccountModel,
@@ -13,11 +12,6 @@ from models import (
 
 
 # Register your models here.
-
-
-@admin.register(BaseExpenseModel)
-class BaseExpenseModelAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(CategoryModel)

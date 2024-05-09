@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from base import TagModel, CurrencyModel
+from .base import TagModel, CurrencyModel
 
 
 class MoneyAccountModel(models.Model):
