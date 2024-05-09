@@ -10,7 +10,18 @@
 -e file:.
 asgiref==3.8.1
     # via django
+black==24.4.2
+click==8.1.7
+    # via black
 django==5.0.6
     # via money-project
+mypy-extensions==1.0.0
+    # via black
+packaging==24.0
+    # via black
+pathspec==0.12.1
+    # via black
+platformdirs==4.2.1
+    # via black
 sqlparse==0.5.0
     # via django
