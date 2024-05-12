@@ -79,6 +79,7 @@ class RegularExpenseModel(BaseExpenseModel):
         HalfYearly = "Half-Yearly", _("Half-Yearly")
         Monthly = "Monthly", _("Monthly")
         Daily = "Daily", _("Daily")
+        WorkDay = "Work-Day", _("Work-Day")
 
     period = models.CharField(max_length=15, choices=Period.choices)
     billing_start = models.DateField(null=True, blank=True)
