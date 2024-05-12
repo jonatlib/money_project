@@ -17,11 +17,23 @@ django==5.0.6
     # via money-project
 mypy-extensions==1.0.0
     # via black
+numpy==1.26.4
+    # via pandas
 packaging==24.0
     # via black
+pandas==2.2.2
+    # via money-project
 pathspec==0.12.1
     # via black
 platformdirs==4.2.1
     # via black
+python-dateutil==2.9.0.post0
+    # via pandas
+pytz==2024.1
+    # via pandas
+six==1.16.0
+    # via python-dateutil
 sqlparse==0.5.0
     # via django
+tzdata==2024.1
+    # via pandas
