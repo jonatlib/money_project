@@ -56,7 +56,7 @@ class BaseExpenseModel(models.Model):
 
 
 class ExtraExpenseModel(BaseExpenseModel):
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
 
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
         pass
@@ -65,7 +65,11 @@ class ExtraExpenseModel(BaseExpenseModel):
         pass
 
     def __str__(self):
-        pass
+        return "{}: {} {}".format(
+            date_format(self.date),
+            self.name,
+            self.format_amount(),
+        )
 
 
 class RegularExpenseModel(BaseExpenseModel):
@@ -87,10 +91,21 @@ class RegularExpenseModel(BaseExpenseModel):
         pass
 
     def __str__(self):
+        start = (
+            date_format(self.billing_start)
+            if self.billing_start is not None
+            else "No start date"
+        )
+        end = (
+            date_format(self.billing_end)
+            if self.billing_end is not None
+            else "No end date"
+        )
+
         return "[{}] {} - {}: {} {}".format(
             self.period,
-            date_format(self.billing_start),
-            date_format(self.billing_end),
+            start,
+            end,
             self.name,
             self.format_amount(),
         )
