@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from account.models import (
-    ExtraExpenseModel,
-    RegularExpenseModel,
+    RegularTransactionModel,
+    ExtraTransactionModel,
     CategoryModel,
     CurrencyModel,
     TagModel,
@@ -24,13 +24,13 @@ class CurrencyModelAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(ExtraExpenseModel)
-class ExtraExpenseModelAdmin(admin.ModelAdmin):
+@admin.register(ExtraTransactionModel)
+class ExtraTransactionModelAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(RegularExpenseModel)
-class RegularExpenseModelAdmin(admin.ModelAdmin):
+@admin.register(RegularTransactionModel)
+class RegularTransactionModelAdmin(admin.ModelAdmin):
     pass
 
 

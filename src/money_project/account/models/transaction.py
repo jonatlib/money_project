@@ -11,7 +11,7 @@ from account.models.account import MoneyAccountModel
 from account.models.base import CurrencyModel
 
 
-class BaseExpenseModel(models.Model):
+class BaseTransactionModel(models.Model):
     class Meta:
         abstract = True
 
@@ -25,19 +25,19 @@ class BaseExpenseModel(models.Model):
         CategoryModel, on_delete=models.SET_NULL, null=True, blank=True, default=None
     )
 
-    account = models.ForeignKey(MoneyAccountModel, on_delete=models.CASCADE)
+    target_account = models.ForeignKey(MoneyAccountModel, on_delete=models.CASCADE)
     counterparty_account = models.ForeignKey(
         MoneyAccountModel,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         default=None,
-        related_name="move_expenses_%(class)ss",
+        related_name="move_transaction_%(class)ss",
     )
 
     @property
     def currency(self) -> CurrencyModel:
-        return self.account.currency
+        return self.target_account.currency
 
     def format_amount(self) -> str:
         return self.currency.format_currency(self.amount)
@@ -55,7 +55,7 @@ class BaseExpenseModel(models.Model):
         pass
 
 
-class ExtraExpenseModel(BaseExpenseModel):
+class ExtraTransactionModel(BaseTransactionModel):
     date = models.DateField()
 
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
@@ -72,7 +72,7 @@ class ExtraExpenseModel(BaseExpenseModel):
         )
 
 
-class RegularExpenseModel(BaseExpenseModel):
+class RegularTransactionModel(BaseTransactionModel):
     class Period(models.TextChoices):
         Yearly = "Yearly", _("Yearly")
         Quarterly = "Quarterly", _("Quarterly")
