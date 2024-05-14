@@ -5,6 +5,7 @@ from typing import Optional
 from django.db import models
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
+from pandas.tseries.offsets import DateOffset, BDay, BaseOffset
 
 from account.models import TagModel, CategoryModel
 from account.models.account import MoneyAccountModel
@@ -51,6 +52,10 @@ class BaseTransactionModel(models.Model):
         pass
 
     @abc.abstractmethod
+    def is_billing_date(self, day: date) -> bool:
+        pass
+
+    @abc.abstractmethod
     def __str__(self):
         pass
 
@@ -59,10 +64,19 @@ class ExtraTransactionModel(BaseTransactionModel):
     date = models.DateField()
 
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
-        pass
+        relative_to = relative_to or date.today()
+        if relative_to <= self.date:
+            return self.date
+        return None
 
     def previous_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
-        pass
+        relative_to = relative_to or date.today()
+        if relative_to > self.date:
+            return self.date
+        return None
+
+    def is_billing_date(self, day: date) -> bool:
+        return day == self.date
 
     def __str__(self):
         return "{}: {} {}".format(
@@ -82,13 +96,33 @@ class RegularTransactionModel(BaseTransactionModel):
         WorkDay = "Work-Day", _("Work-Day")
 
     period = models.CharField(max_length=15, choices=Period.choices)
-    billing_start = models.DateField(null=True, blank=True)
+    billing_start = models.DateField()
     billing_end = models.DateField(null=True, blank=True)
 
+    def _period_to_timedelta(self) -> BaseOffset:
+        match self.period:
+            case "Yearly":
+                return DateOffset(years=1)
+            case "Quarterly":
+                return DateOffset(months=3)
+            case "Half-Yearly":
+                return DateOffset(months=6)
+            case "Monthly":
+                return DateOffset(months=1)
+            case "Daily":
+                return DateOffset(days=1)
+            case "Work-Day":
+                return BDay(1)
+
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
+        relative_to = relative_to or date.today()
         pass
 
     def previous_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
+        relative_to = relative_to or date.today()
+        pass
+
+    def is_billing_date(self, day: date) -> bool:
         pass
 
     def __str__(self):
