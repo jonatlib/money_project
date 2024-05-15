@@ -18,24 +18,24 @@ class BaseTransactionManager(models.Manager):
 
     @staticmethod
     def build_dataframe_all(
-        account: MoneyAccountModel, start_date: date, end_date: date
+        accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> pd.DataFrame:
         df_regular = RegularTransactionModel.objects.build_dataframe(
-            account, start_date, end_date
+            accounts, start_date, end_date
         )
         df_extra = ExtraTransactionModel.objects.build_dataframe(
-            account, start_date, end_date
+            accounts, start_date, end_date
         )
 
         return pd.concat([df_regular, df_extra], ignore_index=True)
 
-    def all_for_account(self, account: MoneyAccountModel) -> models.QuerySet:
+    def all_for_accounts(self, accounts: list[MoneyAccountModel]) -> models.QuerySet:
         """
         Build query set returning all transactions for an account.
         Including reverse operation on a given account.
         """
         return self.all().filter(
-            Q(target_account=account) | Q(counterparty_account=account)
+            Q(target_account__in=accounts) | Q(counterparty_account__in=accounts)
         )
 
     def get_model_name(self) -> str:
@@ -45,21 +45,19 @@ class BaseTransactionManager(models.Manager):
         return f"{self.get_model_name()}-{id}"
 
     def all_for_account_in_range(
-        self, account: MoneyAccountModel, start_date: date, end_date: date
+        self, accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> models.QuerySet:
         raise NotImplementedError
 
     def build_dataframe(
-        self, account: MoneyAccountModel, start_date: date, end_date: date
+        self, accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> pd.DataFrame:
-        transactions = self.all_for_account_in_range(account, start_date, end_date)
+        transactions = self.all_for_account_in_range(accounts, start_date, end_date)
 
         result = []
 
         transaction: BaseTransactionModel
         for transaction in transactions:
-            signum = 1 if transaction.target_account == account else -1
-
             for d in transaction.create_date_generator():
                 if d > end_date:
                     break
@@ -74,35 +72,42 @@ class BaseTransactionManager(models.Manager):
                     counter_party_account = transaction.counterparty_account
                     category = transaction.category
 
-                    result.append(
-                        {
-                            "id": self.get_id(transaction.id),
-                            "raw_id": transaction.id,
-                            # Transaction details
-                            "date": d,
-                            "name": transaction.name,
-                            "amount": signum * transaction.amount,
-                            # Grouping info
-                            "tags": tags,
-                            "category": category.name if category else None,
-                            # Account info
-                            "account": transaction.target_account.name,
-                            "counter_party_account": (
-                                counter_party_account.name
-                                if counter_party_account
-                                else None
-                            ),
-                            # Debug info
-                            "signum": signum,
-                            "account_id": transaction.target_account.id,
-                            "counter_party_account_id": (
-                                counter_party_account.id
-                                if counter_party_account
-                                else None
-                            ),
-                            "model": transaction.__class__.__name__.lower(),
+                    data = {
+                        "id": self.get_id(transaction.id),
+                        "raw_id": transaction.id,
+                        # Transaction details
+                        "date": d,
+                        "name": transaction.name,
+                        "amount": transaction.amount,
+                        # Grouping info
+                        "tags": tags,
+                        "category": category.name if category else None,
+                        # Account info
+                        "account": transaction.target_account.name,
+                        "counter_party_account": (
+                            counter_party_account.name
+                            if counter_party_account
+                            else None
+                        ),
+                        # Debug info
+                        "account_id": transaction.target_account.id,
+                        "counter_party_account_id": (
+                            counter_party_account.id if counter_party_account else None
+                        ),
+                        "model": transaction.__class__.__name__.lower(),
+                    }
+                    result.append(data)
+
+                    if counter_party_account and counter_party_account in accounts:
+                        counter_data = {
+                            **data,
+                            "amount": -data["amount"],
+                            "account": data["counter_party_account"],
+                            "counter_party_account": data["account"],
+                            "account_id": data["counter_party_account_id"],
+                            "counter_party_account_id": data["account_id"],
                         }
-                    )
+                        result.append(counter_data)
 
         return pd.DataFrame(result)
 
@@ -110,9 +115,9 @@ class BaseTransactionManager(models.Manager):
 class ExtraTransactionManager(BaseTransactionManager):
 
     def all_for_account_in_range(
-        self, account: MoneyAccountModel, start_date: date, end_date: date
+        self, accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> models.QuerySet:
-        return self.all_for_account(account).filter(
+        return self.all_for_accounts(accounts).filter(
             Q(date__gte=start_date) & Q(date__lte=end_date)
         )
 
@@ -120,9 +125,9 @@ class ExtraTransactionManager(BaseTransactionManager):
 class RegularTransactionManager(BaseTransactionManager):
 
     def all_for_account_in_range(
-        self, account: MoneyAccountModel, start_date: date, end_date: date
+        self, accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> models.QuerySet:
-        return self.all_for_account(account).filter(
+        return self.all_for_accounts(accounts).filter(
             (Q(billing_start__gte=start_date) & Q(billing_start__lte=end_date))
             | (Q(billing_end__gte=start_date) & Q(billing_end__lte=end_date))
         )

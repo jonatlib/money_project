@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pandas as pd
 from django.core.management.base import BaseCommand, CommandParser
 
 from ...models import BaseTransactionModel, MoneyAccountModel
@@ -19,14 +18,12 @@ class Command(BaseCommand):
         start_date = datetime.strptime(options["start_date"], "%Y-%m-%d").date()
         end_date = datetime.strptime(options["end_date"], "%Y-%m-%d").date()
 
-        data = []
-        for account in accounts:
-            df = BaseTransactionModel.objects.build_dataframe_all(
-                MoneyAccountModel.objects.get(pk=account), start_date, end_date
-            )
-            data.append(df)
+        result = BaseTransactionModel.objects.build_dataframe_all(
+            MoneyAccountModel.objects.filter(id__in=accounts),
+            start_date,
+            end_date,
+        )
 
-        result = pd.concat(data, ignore_index=True)
         self.stdout.write(
             result.to_csv(index=False, header=True, date_format="%Y-%m-%d")
         )
