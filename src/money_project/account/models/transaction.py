@@ -1,6 +1,6 @@
 import abc
 from datetime import date
-from typing import Optional
+from typing import Optional, Iterator
 
 from django.db import models
 from django.utils.formats import date_format
@@ -12,6 +12,7 @@ from account.models.account import MoneyAccountModel
 from account.models.base import CurrencyModel
 
 
+# TODO manager with method to create pandas series with data
 class BaseTransactionModel(models.Model):
     class Meta:
         abstract = True
@@ -44,6 +45,10 @@ class BaseTransactionModel(models.Model):
         return self.currency.format_currency(self.amount)
 
     @abc.abstractmethod
+    def create_date_generator(self) -> Iterator[date]:
+        pass
+
+    @abc.abstractmethod
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
         pass
 
@@ -62,6 +67,9 @@ class BaseTransactionModel(models.Model):
 
 class ExtraTransactionModel(BaseTransactionModel):
     date = models.DateField()
+
+    def create_date_generator(self) -> Iterator[date]:
+        yield self.date
 
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
         relative_to = relative_to or date.today()
@@ -114,16 +122,47 @@ class RegularTransactionModel(BaseTransactionModel):
             case "Work-Day":
                 return BDay(1)
 
+    def create_date_generator(self) -> Iterator[date]:
+        yield self.billing_start
+
+        new_date = self.billing_start + self._period_to_timedelta()
+        while new_date <= self.billing_end:
+            yield new_date
+            new_date += self._period_to_timedelta()
+
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
         relative_to = relative_to or date.today()
-        pass
+
+        # TODO this is really inefficient implementation but hey it works
+        date_generator = self.create_date_generator()
+        for d in date_generator:
+            if d >= relative_to:
+                return d
+
+        return None
 
     def previous_billing(self, relative_to: Optional[date] = None) -> Optional[date]:
         relative_to = relative_to or date.today()
-        pass
+
+        # TODO this is really inefficient implementation but hey it works
+        date_generator = self.create_date_generator()
+        try:
+            previous_date = next(date_generator)
+        except StopIteration:
+            return None
+
+        if previous_date < relative_to:
+            return previous_date
+
+        for d in date_generator:
+            if d >= relative_to:
+                return previous_date
+            previous_date = d
+
+        return None
 
     def is_billing_date(self, day: date) -> bool:
-        pass
+        return self.next_billing(day) == day
 
     def __str__(self):
         start = (
