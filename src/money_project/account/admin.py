@@ -16,34 +16,51 @@ from account.models import (
 
 @admin.register(CategoryModel)
 class CategoryModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [field.name for field in CategoryModel._meta.fields]
 
 
 @admin.register(CurrencyModel)
 class CurrencyModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [field.name for field in CurrencyModel._meta.fields]
 
 
 @admin.register(ExtraTransactionModel)
 class ExtraTransactionModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [
+        field.name for field in ExtraTransactionModel._meta.fields
+    ]
+    list_filter = ["category", "tag", "target_account", "date"]
 
 
 @admin.register(RegularTransactionModel)
 class RegularTransactionModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [
+        field.name for field in RegularTransactionModel._meta.fields
+    ]
+    list_filter = [
+        "category",
+        "tag",
+        "target_account",
+        "billing_start",
+        "billing_end",
+        "period",
+    ]
 
 
 @admin.register(TagModel)
 class TagModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [field.name for field in TagModel._meta.fields]
 
 
 @admin.register(ManualAccountStateModel)
 class ManualAccountStateModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [
+        field.name for field in ManualAccountStateModel._meta.fields
+    ]
 
 
 @admin.register(MoneyAccountModel)
 class MoneyAccountModelAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["__str__"] + [
+        field.name for field in MoneyAccountModel._meta.fields
+    ]
