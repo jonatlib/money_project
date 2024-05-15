@@ -38,6 +38,12 @@ class BaseTransactionManager(models.Manager):
             Q(target_account=account) | Q(counterparty_account=account)
         )
 
+    def get_model_name(self) -> str:
+        return self.model.__name__.lower()
+
+    def get_id(self, id: int) -> str:
+        return f"{self.get_model_name()}-{id}"
+
     def all_for_account_in_range(
         self, account: MoneyAccountModel, start_date: date, end_date: date
     ) -> models.QuerySet:
@@ -55,6 +61,9 @@ class BaseTransactionManager(models.Manager):
             signum = 1 if transaction.target_account == account else -1
 
             for d in transaction.create_date_generator():
+                if d > end_date:
+                    break
+
                 if d >= start_date:
                     tags = [
                         name
@@ -62,21 +71,38 @@ class BaseTransactionManager(models.Manager):
                         for name in tag.get_all_names()
                     ]
 
+                    counter_party_account = transaction.counterparty_account
+                    category = transaction.category
+
                     result.append(
                         {
+                            "id": self.get_id(transaction.id),
+                            "raw_id": transaction.id,
+                            # Transaction details
                             "date": d,
-                            "id": transaction.id,
                             "name": transaction.name,
-                            "signum": signum,
                             "amount": signum * transaction.amount,
+                            # Grouping info
                             "tags": tags,
-                            "category": transaction.category.name,
-                            "account": account.name,
-                            "counter_party_account": transaction.counterparty_account.name,
+                            "category": category.name if category else None,
+                            # Account info
+                            "account": transaction.target_account.name,
+                            "counter_party_account": (
+                                counter_party_account.name
+                                if counter_party_account
+                                else None
+                            ),
+                            # Debug info
+                            "signum": signum,
+                            "account_id": transaction.target_account.id,
+                            "counter_party_account_id": (
+                                counter_party_account.id
+                                if counter_party_account
+                                else None
+                            ),
+                            "model": transaction.__class__.__name__.lower(),
                         }
                     )
-                if d > end_date:
-                    break
 
         return pd.DataFrame(result)
 
@@ -221,8 +247,8 @@ class RegularTransactionModel(BaseTransactionModel):
         yield self.billing_start
 
         new_date = self.billing_start + self._period_to_timedelta()
-        while new_date <= self.billing_end:
-            yield new_date
+        while self.billing_end is None or new_date <= self.billing_end:
+            yield new_date.date()
             new_date += self._period_to_timedelta()
 
     def next_billing(self, relative_to: Optional[date] = None) -> Optional[date]:

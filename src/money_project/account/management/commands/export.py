@@ -16,8 +16,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         accounts = options["accounts"]
-        start_date = datetime.strptime(options["start_date"], "%Y-%m-%d")
-        end_date = datetime.strptime(options["end_date"], "%Y-%m-%d")
+        start_date = datetime.strptime(options["start_date"], "%Y-%m-%d").date()
+        end_date = datetime.strptime(options["end_date"], "%Y-%m-%d").date()
 
         data = []
         for account in accounts:
