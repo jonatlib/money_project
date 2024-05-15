@@ -2,7 +2,9 @@ import abc
 from datetime import date
 from typing import Optional, Iterator
 
+import pandas as pd
 from django.db import models
+from django.db.models import Q
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 from pandas.tseries.offsets import DateOffset, BDay, BaseOffset
@@ -12,7 +14,94 @@ from account.models.account import MoneyAccountModel
 from account.models.base import CurrencyModel
 
 
-# TODO manager with method to create pandas series with data
+class BaseTransactionManager(models.Manager):
+
+    @staticmethod
+    def build_dataframe_all(
+        account: MoneyAccountModel, start_date: date, end_date: date
+    ) -> pd.DataFrame:
+        df_regular = RegularTransactionModel.objects.build_dataframe(
+            account, start_date, end_date
+        )
+        df_extra = ExtraTransactionModel.objects.build_dataframe(
+            account, start_date, end_date
+        )
+
+        return pd.concat([df_regular, df_extra], ignore_index=True)
+
+    def all_for_account(self, account: MoneyAccountModel) -> models.QuerySet:
+        """
+        Build query set returning all transactions for an account.
+        Including reverse operation on a given account.
+        """
+        return self.all().filter(
+            Q(target_account=account) | Q(counterparty_account=account)
+        )
+
+    def all_for_account_in_range(
+        self, account: MoneyAccountModel, start_date: date, end_date: date
+    ) -> models.QuerySet:
+        raise NotImplementedError
+
+    def build_dataframe(
+        self, account: MoneyAccountModel, start_date: date, end_date: date
+    ) -> pd.DataFrame:
+        transactions = self.all_for_account_in_range(account, start_date, end_date)
+
+        result = []
+
+        transaction: BaseTransactionModel
+        for transaction in transactions:
+            signum = 1 if transaction.target_account == account else -1
+
+            for d in transaction.create_date_generator():
+                if d >= start_date:
+                    tags = [
+                        name
+                        for tag in transaction.tag.all()
+                        for name in tag.get_all_names()
+                    ]
+
+                    result.append(
+                        {
+                            "date": d,
+                            "id": transaction.id,
+                            "name": transaction.name,
+                            "signum": signum,
+                            "amount": signum * transaction.amount,
+                            "tags": tags,
+                            "category": transaction.category.name,
+                            "account": account.name,
+                            "counter_party_account": transaction.counterparty_account.name,
+                        }
+                    )
+                if d > end_date:
+                    break
+
+        return pd.DataFrame(result)
+
+
+class ExtraTransactionManager(BaseTransactionManager):
+
+    def all_for_account_in_range(
+        self, account: MoneyAccountModel, start_date: date, end_date: date
+    ) -> models.QuerySet:
+        return self.all_for_account(account).filter(
+            Q(date__gte=start_date) & Q(date__lte=end_date)
+        )
+
+
+class RegularTransactionManager(BaseTransactionManager):
+
+    def all_for_account_in_range(
+        self, account: MoneyAccountModel, start_date: date, end_date: date
+    ) -> models.QuerySet:
+        return self.all_for_account(account).filter(
+            (Q(billing_start__gte=start_date) & Q(billing_start__lte=end_date))
+            | (Q(billing_end__gte=start_date) & Q(billing_end__lte=end_date))
+        )
+
+
 class BaseTransactionModel(models.Model):
     class Meta:
         abstract = True
@@ -36,6 +125,8 @@ class BaseTransactionModel(models.Model):
         default=None,
         related_name="move_transaction_%(class)ss",
     )
+
+    objects = BaseTransactionManager
 
     @property
     def currency(self) -> CurrencyModel:
@@ -67,6 +158,8 @@ class BaseTransactionModel(models.Model):
 
 class ExtraTransactionModel(BaseTransactionModel):
     date = models.DateField()
+
+    objects = ExtraTransactionManager()
 
     def create_date_generator(self) -> Iterator[date]:
         yield self.date
@@ -106,6 +199,8 @@ class RegularTransactionModel(BaseTransactionModel):
     period = models.CharField(max_length=15, choices=Period.choices)
     billing_start = models.DateField()
     billing_end = models.DateField(null=True, blank=True)
+
+    objects = RegularTransactionManager()
 
     def _period_to_timedelta(self) -> BaseOffset:
         match self.period:

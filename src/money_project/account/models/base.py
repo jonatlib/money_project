@@ -9,6 +9,16 @@ class TagModel(models.Model):
     used_for_grouping = models.BooleanField(default=False)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
+    # FIXME beware of cycles -  self-parent, handle in save
+
+    def get_all_names(self) -> list[str]:
+        names = [self.name]
+        current_parent = self.parent
+        while current_parent:
+            names.append(current_parent.name)
+            current_parent = current_parent.parent
+        return names
+
     def __str__(self):
         return self.name
 
