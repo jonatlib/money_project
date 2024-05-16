@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandParser
 
-from ...accounting.account import get_ideal_account_balance
+from ...accounting.account import get_ideal_account_balance, get_real_account_balance
 from ...models import MoneyAccountModel
 
 
@@ -27,8 +27,10 @@ class Command(BaseCommand):
                 MoneyAccountModel.objects.filter(id__in=accounts), start_date, end_date
             )
         else:
-            raise NotImplementedError
+            result = get_real_account_balance(
+                MoneyAccountModel.objects.filter(id__in=accounts), start_date, end_date
+            )
 
         self.stdout.write(
-            result.to_csv(index=False, header=True, date_format="%Y-%m-%d")
+            result.to_csv(index=True, header=True, date_format="%Y-%m-%d")
         )

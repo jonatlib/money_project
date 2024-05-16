@@ -23,7 +23,7 @@ class MoneyAccountModel(models.Model):
 
 class ManualAccountStateModel(models.Model):
     id = models.AutoField(primary_key=True)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
     account = models.ForeignKey(MoneyAccountModel, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
