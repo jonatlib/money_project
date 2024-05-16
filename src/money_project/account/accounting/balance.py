@@ -52,10 +52,22 @@ def get_real_account_balance(
     manual_states_df = pd.DataFrame(manual_states).set_index(["account", "date"])
 
     df = pd.concat([ideal_df, manual_states_df], axis=1, join="outer")
+    df.balance = df.groupby(["account"]).balance.fillna(method="ffill")
+    df.amount.fillna(0, inplace=True)
+    df["balance_snapshot_ffill"] = df["balance_snapshot"].astype("float64")
+    df.balance_snapshot_ffill = (
+        df.groupby(["account"]).balance_snapshot_ffill.fillna(method="ffill").fillna(0)
+    )
+
     df["real_balance"] = (
-        df["balance"]
-        - df["balance"].where(~df.balance_snapshot.isna()).ffill().fillna(0)
-        + df["balance_snapshot"].astype("float64").fillna(method="ffill").fillna(0)
+        df.balance
+        - (
+            df.where(~df.balance_snapshot.isna())
+            .groupby(["account"])
+            .balance.ffill()
+            .fillna(0)
+        )
+        + df.balance_snapshot_ffill
     )
 
     # TODO maybe cut the dataframe according to start and end

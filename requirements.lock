@@ -11,6 +11,11 @@
 asgiref==3.8.1
     # via django
 django==5.0.6
+    # via django-js-asset
+    # via money-project
+django-js-asset==2.2.0
+    # via django-mptt
+django-mptt==0.16.0
     # via money-project
 numpy==1.26.4
     # via pandas

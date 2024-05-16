@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "django>=5.0.6",
     "pandas>=2.2.2",
+    "django-mptt>=0.16.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

@@ -1,13 +1,19 @@
 from decimal import Decimal
 
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
 
 
-class TagModel(models.Model):
+class TagModel(MPTTModel):
+    class MPTTMeta:
+        order_insertion_by = ["name"]
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     used_for_grouping = models.BooleanField(default=False)
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
+    parent = TreeForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
+    )
 
     # FIXME beware of cycles -  self-parent, handle in save
 

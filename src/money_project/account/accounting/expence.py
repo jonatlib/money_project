@@ -11,8 +11,12 @@ def get_expenses_per_category(
     df = BaseTransactionModel.objects.build_dataframe_all(
         accounts, start_date, end_date
     )
-    df = df[df.amount < 0]
+    try:
+        df = df[df.amount < 0]
+    except AttributeError:
+        return df
 
+    df.category.fillna("-", inplace=True)
     return df.groupby(["account", "category"])[["amount"]].sum()
 
 
@@ -22,9 +26,13 @@ def get_expenses_per_category_per_month(
     df = BaseTransactionModel.objects.build_dataframe_all(
         accounts, start_date, end_date
     )
-    df["date"] = pd.to_datetime(df["date"])
-    df = df[df.amount < 0]
+    try:
+        df = df[df.amount < 0]
+    except AttributeError:
+        return df
 
+    df.category.fillna("-", inplace=True)
+    df["date"] = pd.to_datetime(df["date"])
     return df.groupby(["account", "category", pd.Grouper(freq="ME", key="date")])[
         ["amount"]
     ].sum()

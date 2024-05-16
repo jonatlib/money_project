@@ -1,4 +1,5 @@
 from django.contrib import admin
+from mptt.admin import DraggableMPTTAdmin, TreeRelatedFieldListFilter
 
 from account.models import (
     RegularTransactionModel,
@@ -29,7 +30,12 @@ class ExtraTransactionModelAdmin(admin.ModelAdmin):
     list_display = ["__str__"] + [
         field.name for field in ExtraTransactionModel._meta.fields
     ]
-    list_filter = ["category", "tag", "target_account", "date"]
+    list_filter = [
+        "category",
+        ("tag", TreeRelatedFieldListFilter),
+        "target_account",
+        "date",
+    ]
 
 
 @admin.register(RegularTransactionModel)
@@ -39,7 +45,7 @@ class RegularTransactionModelAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         "category",
-        "tag",
+        ("tag", TreeRelatedFieldListFilter),
         "target_account",
         "billing_start",
         "billing_end",
@@ -48,8 +54,16 @@ class RegularTransactionModelAdmin(admin.ModelAdmin):
 
 
 @admin.register(TagModel)
-class TagModelAdmin(admin.ModelAdmin):
-    list_display = ["__str__"] + [field.name for field in TagModel._meta.fields]
+class TagModelAdmin(DraggableMPTTAdmin):
+    list_display = [
+        "tree_actions",
+        "indented_title",
+        "id",
+        "name",
+        "used_for_grouping",
+        "parent",
+    ]
+    list_display_links = ("indented_title",)
 
 
 @admin.register(ManualAccountStateModel)

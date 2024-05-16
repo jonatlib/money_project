@@ -14,6 +14,11 @@ black==24.4.2
 click==8.1.7
     # via black
 django==5.0.6
+    # via django-js-asset
+    # via money-project
+django-js-asset==2.2.0
+    # via django-mptt
+django-mptt==0.16.0
     # via money-project
 mypy-extensions==1.0.0
     # via black

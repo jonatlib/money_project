@@ -257,7 +257,7 @@ class RegularTransactionModel(BaseTransactionModel):
         yield self.billing_start
 
         new_date = self.billing_start + self._period_to_timedelta()
-        while self.billing_end is None or new_date <= self.billing_end:
+        while self.billing_end is None or new_date.date() <= self.billing_end:
             yield new_date.date()
             new_date += self._period_to_timedelta()
 
