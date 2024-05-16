@@ -63,10 +63,13 @@ class BaseTransactionManager(models.Manager):
                     break
 
                 if d >= start_date:
+                    transaction_tags = transaction.tag.all()
                     tags = [
-                        name
-                        for tag in transaction.tag.all()
-                        for name in tag.get_all_names()
+                        name for tag in transaction_tags for name in tag.get_all_names()
+                    ]
+
+                    tag_ids = [
+                        ids for tag in transaction_tags for ids in tag.get_all_ids()
                     ]
 
                     counter_party_account = transaction.counterparty_account
@@ -90,6 +93,8 @@ class BaseTransactionManager(models.Manager):
                             else None
                         ),
                         # Debug info
+                        "tag_ids": tag_ids,
+                        "category_id": category.id if category else None,
                         "account_id": transaction.target_account.id,
                         "counter_party_account_id": (
                             counter_party_account.id if counter_party_account else None

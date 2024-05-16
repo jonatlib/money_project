@@ -19,6 +19,14 @@ class TagModel(models.Model):
             current_parent = current_parent.parent
         return names
 
+    def get_all_ids(self) -> list[int]:
+        ids = [self.id]
+        current_parent = self.parent
+        while current_parent:
+            ids.append(current_parent.id)
+            current_parent = current_parent.parent
+        return ids
+
     def __str__(self):
         return self.name
 
