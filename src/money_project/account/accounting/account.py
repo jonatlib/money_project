@@ -45,6 +45,8 @@ def get_real_account_balance(
         )
     ]
     if not manual_states:
+        ideal_df["real_balance"] = ideal_df["balance"]
+        ideal_df["balance_snapshot"] = pd.NA
         return ideal_df
 
     manual_states_df = pd.DataFrame(manual_states).set_index(["account", "date"])
