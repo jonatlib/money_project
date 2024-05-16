@@ -6,6 +6,8 @@ from .accounting.balance import get_real_account_balance
 from .accounting.expence import (
     get_expenses_per_category,
     get_expenses_per_category_per_month,
+    get_expenses_per_tag,
+    get_expenses_per_tag_per_month,
 )
 from .models import MoneyAccountModel
 
@@ -27,6 +29,12 @@ class HomeView(TemplateView):
             accounts, start_date, end_date
         ).to_html()
         context["expenses_month"] = get_expenses_per_category_per_month(
+            accounts, start_date, end_date
+        ).to_html()
+        context["expenses_tag"] = get_expenses_per_tag(
+            accounts, start_date, end_date
+        ).to_html()
+        context["expenses_tag_per_month"] = get_expenses_per_tag_per_month(
             accounts, start_date, end_date
         ).to_html()
 
