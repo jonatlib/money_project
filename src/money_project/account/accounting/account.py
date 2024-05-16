@@ -56,4 +56,6 @@ def get_real_account_balance(
         + df["balance_snapshot"].astype("float64").fillna(method="ffill").fillna(0)
     )
 
+    # TODO maybe cut the dataframe according to start and end
+    # TODO as this can be bigger because of the manual balance updates
     return df[["amount", "balance", "real_balance", "balance_snapshot"]]
