@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+
+{% block body_tag %}
+    <body class="bg-base-200">
+{% endblock %}
+
+{% block main %}
+    {% block navbar %}
+        {% include "layout/navbar.html" %}
+    {% endblock %}
+
+    {% block body %}
+        <div class="px-8">
+            {% block breadcrumbs %}
+                {% include "layout/breadcrumbs.html" %}
+            {% endblock %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    {% endblock %}
+{% endblock %}

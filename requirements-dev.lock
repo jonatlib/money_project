@@ -10,11 +10,15 @@
 -e file:.
 asgiref==3.8.1
     # via django
+    # via django-browser-reload
 black==24.4.2
 click==8.1.7
     # via black
 django==5.0.6
+    # via django-browser-reload
     # via django-js-asset
+    # via money-project
+django-browser-reload==1.12.1
     # via money-project
 django-js-asset==2.2.0
     # via django-mptt

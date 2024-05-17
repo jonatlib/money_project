@@ -20,4 +20,8 @@ from django.urls import path, include
 
 import account.urls
 
-urlpatterns = [path("admin/", admin.site.urls), path(r"", include(account.urls))]
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path(r"", include(account.urls)),
+    path("__reload__/", include("django_browser_reload.urls")),
+]

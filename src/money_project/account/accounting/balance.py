@@ -12,13 +12,17 @@ def get_ideal_account_balance(
         accounts, start_date, end_date
     )
 
-    result = (
-        df.groupby(["date", "account"])
-        .agg(
-            amount=("amount", "sum"),
+    try:
+        result = (
+            df.groupby(["date", "account"])
+            .agg(
+                amount=("amount", "sum"),
+            )
+            .reset_index()
         )
-        .reset_index()
-    )
+    except KeyError:
+        return df
+
     result.sort_values(by=["account", "date"], ascending=True, inplace=True)
     result["f_amount"] = result.amount.astype("float64")
     result["balance"] = result.groupby("account").f_amount.cumsum()
@@ -32,6 +36,8 @@ def get_real_account_balance(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
     ideal_df = get_ideal_account_balance(accounts, start_date, end_date)
+    if ideal_df.empty:
+        return ideal_df
 
     # TODO do we need to filter by start date?
     manual_states = [

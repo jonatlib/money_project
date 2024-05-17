@@ -1,15 +1,42 @@
-Hello
+{% extends "layout.html" %}
 
-{{ expenses_tag|safe }}
-{{ expenses_tag_per_month|safe }}
+{% block content %}
+    <div class="flex items-center gap-8 justify-center mt-10">
+        {% include 'components/account.html' %}
+        {% include 'components/account.html' %}
+        {% include 'components/account.html' %}
+    </div>
 
-<hr/>
+    <div class="flex gap-4 w-full mt-10">
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
+            <h2>Upcoming expenses</h2>
+            {% include "components/upcoming.html" %}
+        </div>
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
+            <h2>Upcoming incomes</h2>
+            {% include "components/upcoming.html" %}
+        </div>
+    </div>
 
-{{ expenses|safe }}
-{{ expenses_month|safe }}
+    <div>
 
-<hr/>
+    </div>
+{% endblock %}
 
-{{ balance|safe }}
-
-<hr/>
+{#{% block main %}#}
+{#    Hello#}
+{##}
+{#    {{ expenses_tag|safe }}#}
+{#    {{ expenses_tag_per_month|safe }}#}
+{##}
+{#    <hr/>#}
+{##}
+{#    {{ expenses|safe }}#}
+{#    {{ expenses_month|safe }}#}
+{##}
+{#    <hr/>#}
+{##}
+{#    {{ balance|safe }}#}
+{##}
+{#    <hr/>#}
+{#{% endblock %}#}

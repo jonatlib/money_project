@@ -6,6 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# js modules
+/src/money_project/jstoolchains/node_modules/
+
 # venv
 .venv
 
