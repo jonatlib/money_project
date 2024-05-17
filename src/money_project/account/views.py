@@ -1,5 +1,6 @@
 from datetime import date
 
+import plotly.express as px
 from django.views.generic import TemplateView
 
 from .accounting.balance import get_real_account_balance
@@ -37,5 +38,25 @@ class HomeView(TemplateView):
         context["expenses_tag_per_month"] = get_expenses_per_tag_per_month(
             accounts, start_date, end_date
         ).to_html()
+
+        figure = px.bar(
+            get_expenses_per_category(accounts, start_date, end_date).reset_index()[
+                ["category", "amount"]
+            ],
+            y="amount",
+            x="category",
+            template="none",
+        )
+        figure.update_layout(
+            {
+                "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                "margin": dict(l=20, r=20, t=20, b=20),
+                "xaxis_title": None,
+                "yaxis_title": None,
+            }
+        )
+        figure.update_yaxes(automargin=True)
+        context["figure"] = figure.to_html(config={"staticPlot": True}, full_html=False)
 
         return context

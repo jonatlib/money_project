@@ -8,18 +8,24 @@
     </div>
 
     <div class="flex gap-4 w-full mt-10">
-        <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Upcoming expenses</h2>
             {% include "components/upcoming.html" %}
         </div>
-        <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Upcoming incomes</h2>
             {% include "components/upcoming.html" %}
         </div>
     </div>
 
-    <div>
-
+    <div class="flex gap-4 w-full mt-10">
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
+            <h2>Expenses per category</h2>
+            {{ figure | safe }}
+        </div>
+        <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
+            {% include "components/upcoming.html" %}
+        </div>
     </div>
 {% endblock %}
 

@@ -10,6 +10,7 @@ dependencies = [
     "pandas>=2.2.2",
     "django-mptt>=0.16.0",
     "django-browser-reload>=1.12.1",
+    "plotly>=5.22.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

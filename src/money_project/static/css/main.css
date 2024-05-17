@@ -2260,6 +2260,10 @@ html {
   width: 100%;
 }
 
+.max-w-10 {
+  max-width: 2.5rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -2415,6 +2419,18 @@ html {
 
 .pe-20 {
   padding-inline-end: 5rem;
+}
+
+.pt-10 {
+  padding-top: 2.5rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.pt-3 {
+  padding-top: 0.75rem;
 }
 
 .text-lg {
