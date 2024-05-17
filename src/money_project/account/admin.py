@@ -16,8 +16,16 @@ from account.models import (
 
 
 @admin.register(CategoryModel)
-class CategoryModelAdmin(admin.ModelAdmin):
-    list_display = ["__str__"] + [field.name for field in CategoryModel._meta.fields]
+class CategoryModelAdmin(DraggableMPTTAdmin):
+    list_display = [
+        "tree_actions",
+        "indented_title",
+        "id",
+        "name",
+        "color",
+        "parent",
+    ]
+    list_display_links = ("indented_title",)
 
 
 @admin.register(CurrencyModel)
@@ -60,6 +68,7 @@ class TagModelAdmin(DraggableMPTTAdmin):
         "indented_title",
         "id",
         "name",
+        "color",
         "used_for_grouping",
         "parent",
     ]

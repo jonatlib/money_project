@@ -11,6 +11,7 @@ class TagModel(MPTTModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     used_for_grouping = models.BooleanField(default=False)
+    color = models.CharField(max_length=10, default="#AAAAAA")
     parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
@@ -37,9 +38,16 @@ class TagModel(MPTTModel):
         return self.name
 
 
-class CategoryModel(models.Model):
+class CategoryModel(MPTTModel):
+    class MPTTMeta:
+        order_insertion_by = ["name"]
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
+    color = models.CharField(max_length=10, default="#AAAAAA")
+    parent = TreeForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
+    )
 
     def __str__(self):
         return self.name
