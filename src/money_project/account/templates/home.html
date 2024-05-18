@@ -24,8 +24,20 @@
             {{ figure | safe }}
         </div>
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
-            {% include "components/upcoming.html" %}
+            <h2>Expenses per tag</h2>
+            {{ figure2 | safe }}
         </div>
+    </div>
+
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>Money in time [days]</h2>
+        per day chart for all accounts? (maybe way to ignore some accounts)
+        maybe try waterfall chart?
+    </div>
+
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>Expenses and incomes per month</h2>
+        double chart up and down, maybe per account per month?
     </div>
 {% endblock %}
 

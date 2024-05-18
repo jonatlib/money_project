@@ -59,4 +59,26 @@ class HomeView(TemplateView):
         figure.update_yaxes(automargin=True)
         context["figure"] = figure.to_html(config={"staticPlot": True}, full_html=False)
 
+        figure = px.bar(
+            get_expenses_per_category(accounts, start_date, end_date).reset_index()[
+                ["category", "amount"]
+            ],
+            y="amount",
+            x="category",
+            template="none",
+        )
+        figure.update_layout(
+            {
+                "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                "margin": dict(l=20, r=20, t=20, b=20),
+                "xaxis_title": None,
+                "yaxis_title": None,
+            }
+        )
+        figure.update_yaxes(automargin=True)
+        context["figure2"] = figure.to_html(
+            config={"staticPlot": True}, full_html=False
+        )
+
         return context

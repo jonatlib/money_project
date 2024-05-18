@@ -1,4 +1,4 @@
-<div class="card w-96 bg-base-100 shadow-xl relative">
+<div class="card w-[35rem] bg-base-100 shadow-xl relative">
     <div class="absolute top-0 right-0">
         <div class="badge badge-outline">default</div>
         <div class="badge badge-primary badge-outline">primary</div>
@@ -18,15 +18,40 @@
 
         <p>If a dog chews shoes whose shoes does he choose?</p>
 
-        <div>
-            <div class="text-2xl">300 000 Kč</div>
-            <progress class="progress progress-success w-56" value="70" max="100"></progress>
+        <div class="flex gap-4 w-full">
+            <div class="grid flex-grow">
+                <div class="stat p-0 mt-2">
+                    <div class="stat-title">Real state</div>
+                    <div class="stat-value text-2xl">300 000 Kč</div>
+                    <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
+                </div>
+            </div>
+            <div class="grid flex-grow">
+                <div class="stat p-0 mt-2">
+                    <div class="stat-title">Model state</div>
+                    <div class="stat-value text-2xl">300 000 Kč</div>
+                    <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
+                </div>
+            </div>
         </div>
 
-        <div class="text-sm">
-            <div><span>Start of month:</span> 30 000 Kč</div>
-            <div><span>End of month:</span> 30 000 Kč</div>
-            <div><span>End of year:</span> 30 000 Kč</div>
+        <div class="flex gap-4 w-full">
+            <div class="grid flex-grow">
+                <h2 class="px-2">Status</h2>
+                <div class="bg-base-200 rounded-box text-sm p-2">
+                    <div><span>Begin month:</span> 30 000 Kč</div>
+                    <div><span>End month:</span> 30 000 Kč</div>
+                    <div><span>End of year:</span> 30 000 Kč</div>
+                </div>
+            </div>
+            <div class="grid flex-grow">
+                <h2 class="px-2">Expenses this month</h2>
+                <div class="bg-base-200 rounded-box text-sm p-2">
+                    <div><span>All:</span> 30 000 Kč</div>
+                    <div><span>Remaining:</span> 30 000 Kč</div>
+                    <div><span>Next month:</span> 30 000 Kč</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
