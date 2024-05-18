@@ -2,9 +2,9 @@
 
 {% block content %}
     <div class="flex items-center gap-8 justify-center mt-10">
-        {% include 'components/account.html' %}
-        {% include 'components/account.html' %}
-        {% include 'components/account.html' %}
+        {% for account in accounts %}
+            {% include 'components/account.html' with account=account %}
+        {% endfor %}
     </div>
 
     <div class="flex gap-4 w-full mt-10">
@@ -21,11 +21,11 @@
     <div class="flex gap-4 w-full mt-10">
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Expenses per category</h2>
-            {{ figure | safe }}
+            {{ figure_category | safe }}
         </div>
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
             <h2>Expenses per tag</h2>
-            {{ figure2 | safe }}
+            {{ figure_tags | safe }}
         </div>
     </div>
 
@@ -33,6 +33,7 @@
         <h2>Money in time [days]</h2>
         per day chart for all accounts? (maybe way to ignore some accounts)
         maybe try waterfall chart?
+        {{ figure_balance | safe }}
     </div>
 
     <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
@@ -40,21 +41,3 @@
         double chart up and down, maybe per account per month?
     </div>
 {% endblock %}
-
-{#{% block main %}#}
-{#    Hello#}
-{##}
-{#    {{ expenses_tag|safe }}#}
-{#    {{ expenses_tag_per_month|safe }}#}
-{##}
-{#    <hr/>#}
-{##}
-{#    {{ expenses|safe }}#}
-{#    {{ expenses_month|safe }}#}
-{##}
-{#    <hr/>#}
-{##}
-{#    {{ balance|safe }}#}
-{##}
-{#    <hr/>#}
-{#{% endblock %}#}

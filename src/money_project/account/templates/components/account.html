@@ -1,22 +1,22 @@
+{% load static %}
 <div class="card w-[35rem] bg-base-100 shadow-xl relative">
     <div class="absolute top-0 right-0">
-        <div class="badge badge-outline">default</div>
-        <div class="badge badge-primary badge-outline">primary</div>
-        <div class="badge badge-secondary badge-outline">secondary</div>
-        <div class="badge badge-accent badge-outline">accent</div>
+        {% for tag in account.tags.all %}
+            <div class="badge badge-outline">{{ tag.name }}</div>
+        {% endfor %}
     </div>
 
     <div class="card-body">
         <div class="flex gap-8">
             <div class="avatar">
                 <div class="w-16 rounded-full">
-                    <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"/>
+                    <img src="{% static "logo/apple-touch-icon.png" %}"/>
                 </div>
             </div>
-            <h2 class="card-title">Card title!</h2>
+            <h2 class="card-title">{{ account.name }}</h2>
         </div>
 
-        <p>If a dog chews shoes whose shoes does he choose?</p>
+        <p>TODO description</p>
 
         <div class="flex gap-4 w-full">
             <div class="grid flex-grow">
