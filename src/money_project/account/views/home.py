@@ -87,6 +87,21 @@ class HomeView(TemplateView):
 
         #####################################################
 
+        # Real balance, model balance
+        # % change to end of previous month
+        # state: month: begin, end
+        #       end of year
+        # month stats:
+        #       all expenses
+        #       remaining expenses
+        #       next month expenses
+        accounts_stats = None
+
+        expenses_until_month_end = None
+        incomes_until_month_end = None
+
+        #####################################################
+
         context["accounts"] = accounts
 
         context["figure_category"] = build_category_chart(
