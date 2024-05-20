@@ -112,7 +112,12 @@ class HomeView(TemplateView):
         )
 
         context["figure_balance"] = build_balance_chart(
-            all_year_balance.reset_index(), "date", "balance"
+            all_year_balance.reset_index()
+            .groupby("date")[["balance"]]
+            .sum()
+            .reset_index(),
+            "date",
+            "balance",
         )
 
         return context

@@ -5,6 +5,9 @@ import pandas as pd
 from ..models import BaseTransactionModel, MoneyAccountModel
 
 
+# FIXME implement ignored transactinos?
+
+
 def get_expenses_per_category(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:

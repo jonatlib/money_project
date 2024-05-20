@@ -82,6 +82,7 @@ class BaseTransactionManager(models.Manager):
                         "date": d,
                         "name": transaction.name,
                         "amount": transaction.amount,
+                        "include_in_statistics": transaction.include_in_statistics,
                         # Grouping info
                         "tags": tags,
                         "category": category.name if category else None,
@@ -146,6 +147,8 @@ class BaseTransactionModel(models.Model):
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    include_in_statistics = models.BooleanField(default=True)
 
     tag = models.ManyToManyField(TagModel, blank=True)
     category = models.ForeignKey(
@@ -229,6 +232,7 @@ class RegularTransactionModel(BaseTransactionModel):
         Quarterly = "Quarterly", _("Quarterly")
         HalfYearly = "Half-Yearly", _("Half-Yearly")
         Monthly = "Monthly", _("Monthly")
+        Weekly = "Weekly", _("Weekly")
         Daily = "Daily", _("Daily")
         WorkDay = "Work-Day", _("Work-Day")
 
@@ -248,6 +252,8 @@ class RegularTransactionModel(BaseTransactionModel):
                 return DateOffset(months=6)
             case "Monthly":
                 return DateOffset(months=1)
+            case "Weekly":
+                return DateOffset(weeks=1)
             case "Daily":
                 return DateOffset(days=1)
             case "Work-Day":
