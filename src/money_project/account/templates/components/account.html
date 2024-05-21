@@ -23,14 +23,20 @@
                 <div class="stat p-0 mt-2">
                     <div class="stat-title">Real state</div>
                     <div class="stat-value text-2xl drop-shadow-lg {% if account.real_balance_raw < 0 %}text-error{% endif %}">{{ account.real_balance }}</div>
-                    <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
+                    <div class="stat-desc">Today last month {% if account.balance_today_last_month_change > 0 %}
+                        ↗{% else %}↘{% endif %} ︎ {{ account.balance_today_last_month }}
+                        ({{ account.balance_today_last_month_change }}%)
+                    </div>
                 </div>
             </div>
             <div class="grid flex-grow">
                 <div class="stat p-0 mt-2">
                     <div class="stat-title">Model state</div>
                     <div class="stat-value text-2xl drop-shadow-lg {% if account.balance_raw < 0 %}text-error{% endif %}">{{ account.balance }}</div>
-                    <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
+                    <div class="stat-desc">Today last month {% if account.real_balance_today_last_month_change > 0 %}
+                        ↗{% else %}↘{% endif %}︎ {{ account.real_balance_today_last_month }}
+                        ({{ account.real_balance_today_last_month_change }}%)
+                    </div>
                 </div>
             </div>
         </div>

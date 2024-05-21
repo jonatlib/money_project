@@ -1,6 +1,7 @@
 import calendar
-from datetime import date, timedelta
+from datetime import date
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from django.views.generic import TemplateView
@@ -67,7 +68,7 @@ class HomeView(TemplateView):
         end_of_month = date.today().replace(
             day=calendar.monthrange(today.year, today.month)[1]
         )
-        previous_month = start_of_month - timedelta(days=1)
+        previous_month_today = (start_of_month - DateOffset(months=1)).date()
         end_of_year = date.today().replace(
             day=calendar.monthrange(today.year, 12)[1], month=12
         )
@@ -107,23 +108,42 @@ class HomeView(TemplateView):
         #       remaining expenses
         #       next month expenses
         per_account_next_month_expenses = (
-            all_transactions_next_month.reset_index()
+            all_transactions_next_month[all_transactions_next_month.amount < 0]
+            .reset_index()
             .groupby("account_id")[["amount"]]
             .sum()
             .to_dict()["amount"]
         )
         per_account_this_month_expenses = (
-            all_transactions_this_month.reset_index()
+            all_transactions_this_month[all_transactions_this_month.amount < 0]
+            .reset_index()
             .groupby("account_id")[["amount"]]
             .sum()
             .to_dict()["amount"]
         )
 
-        today_balance = (
-            all_year_balance[all_year_balance.date == today]
-            .set_index("account_id")
-            .to_dict()
+        today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
+            "account_id"
         )
+        today_balance = today_balance_df.to_dict()
+
+        today_previous_month_balance_df = all_year_balance[
+            all_year_balance.date == previous_month_today
+        ].set_index("account_id")
+        a = today_balance_df[["balance", "real_balance"]]
+        b = today_previous_month_balance_df[["balance", "real_balance"]]
+        today_previous_month_balance_df = pd.concat(
+            [
+                today_previous_month_balance_df,
+                (((b - a) / b) * 100)
+                .replace([np.inf, -np.inf], 0)
+                .applymap(int)
+                .add_suffix("_change"),
+            ],
+            axis=1,
+        )
+        today_previous_month_balance = today_previous_month_balance_df.to_dict()
+
         # per_account_this_month_remaining_expenses = (
         #     all_transactions_this_month[all_transactions_this_month.date > today]
         #     .groupby("account")[["amount"]]
@@ -132,6 +152,8 @@ class HomeView(TemplateView):
         # per_account_end_of_year_balance = (
         #     all_year_balance.groupby("account")[["amount"]].last().to_dict()
         # )
+
+        context["tmp"] = today_previous_month_balance
 
         #####################################################
 
@@ -152,6 +174,24 @@ class HomeView(TemplateView):
                 "real_balance": account.currency.format_currency(
                     today_balance["real_balance"].get(account.id, 0)
                 ),
+                "balance_today_last_month_raw": today_previous_month_balance[
+                    "balance"
+                ].get(account.id, 0),
+                "balance_today_last_month": account.currency.format_currency(
+                    today_previous_month_balance["balance"].get(account.id, 0)
+                ),
+                "real_balance_today_last_month_raw": today_previous_month_balance[
+                    "real_balance"
+                ].get(account.id, 0),
+                "real_balance_today_last_month": account.currency.format_currency(
+                    today_previous_month_balance["real_balance"].get(account.id, 0)
+                ),
+                "balance_today_last_month_change": today_previous_month_balance[
+                    "balance_change"
+                ].get(account.id, 0),
+                "real_balance_today_last_month_change": today_previous_month_balance[
+                    "real_balance_change"
+                ].get(account.id, 0),
             }
             for account in accounts
         ]
