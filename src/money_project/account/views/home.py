@@ -107,6 +107,8 @@ class HomeView(TemplateView):
         #       all expenses
         #       remaining expenses
         #       next month expenses
+
+        # Expanses
         per_account_next_month_expenses = (
             all_transactions_next_month[all_transactions_next_month.amount < 0]
             .reset_index()
@@ -121,7 +123,18 @@ class HomeView(TemplateView):
             .sum()
             .to_dict()["amount"]
         )
+        per_account_this_month_remaining_expenses = (
+            all_transactions_this_month[
+                (all_transactions_this_month.amount < 0)
+                & (all_transactions_this_month.date > today)
+            ]
+            .reset_index()
+            .groupby("account_id")[["amount"]]
+            .sum()
+            .to_dict()["amount"]
+        )
 
+        # Balances
         today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
             "account_id"
         )
@@ -144,6 +157,23 @@ class HomeView(TemplateView):
         )
         today_previous_month_balance = today_previous_month_balance_df.to_dict()
 
+        # Balances in time
+        start_of_month_balance = (
+            all_year_balance[all_year_balance.date == start_of_month]
+            .set_index("account_id")
+            .to_dict()
+        )
+        end_of_month_balance = (
+            all_year_balance[all_year_balance.date == end_of_month]
+            .set_index("account_id")
+            .to_dict()
+        )
+        end_of_year_balance = (
+            all_year_balance[all_year_balance.date == end_of_year]
+            .set_index("account_id")
+            .to_dict()
+        )
+
         # per_account_this_month_remaining_expenses = (
         #     all_transactions_this_month[all_transactions_this_month.date > today]
         #     .groupby("account")[["amount"]]
@@ -153,19 +183,28 @@ class HomeView(TemplateView):
         #     all_year_balance.groupby("account")[["amount"]].last().to_dict()
         # )
 
-        context["tmp"] = today_previous_month_balance
+        # context["tmp"] = today_previous_month_balance
 
         #####################################################
 
         context["accounts"] = [
             {
+                #
+                # Django model
                 "model": account,
+                #
+                # Expanses
                 "next_month_expenses": account.currency.format_currency(
                     per_account_next_month_expenses.get(account.id, 0)
                 ),
                 "this_month_expenses": account.currency.format_currency(
                     per_account_this_month_expenses.get(account.id, 0)
                 ),
+                "this_month_remaining_expenses": account.currency.format_currency(
+                    per_account_this_month_remaining_expenses.get(account.id, 0)
+                ),
+                #
+                # Balances
                 "balance_raw": today_balance["balance"].get(account.id, 0),
                 "balance": account.currency.format_currency(
                     today_balance["balance"].get(account.id, 0)
@@ -174,6 +213,19 @@ class HomeView(TemplateView):
                 "real_balance": account.currency.format_currency(
                     today_balance["real_balance"].get(account.id, 0)
                 ),
+                #
+                # Balances in time
+                "real_balance_start_of_month": account.currency.format_currency(
+                    start_of_month_balance["real_balance"].get(account.id, 0)
+                ),
+                "real_balance_end_of_month": account.currency.format_currency(
+                    end_of_month_balance["real_balance"].get(account.id, 0)
+                ),
+                "real_balance_end_of_year": account.currency.format_currency(
+                    end_of_year_balance["real_balance"].get(account.id, 0)
+                ),
+                #
+                # Last month today balances
                 "balance_today_last_month_raw": today_previous_month_balance[
                     "balance"
                 ].get(account.id, 0),
@@ -186,6 +238,7 @@ class HomeView(TemplateView):
                 "real_balance_today_last_month": account.currency.format_currency(
                     today_previous_month_balance["real_balance"].get(account.id, 0)
                 ),
+                # Last month today balance change
                 "balance_today_last_month_change": today_previous_month_balance[
                     "balance_change"
                 ].get(account.id, 0),

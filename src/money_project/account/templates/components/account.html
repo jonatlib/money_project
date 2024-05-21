@@ -16,7 +16,7 @@
             <h2 class="card-title">{{ account.model.name }}</h2>
         </div>
 
-        <p>TODO description</p>
+        <p>{{ account.account.description }}</p>
 
         <div class="flex gap-4 w-full">
             <div class="grid flex-grow">
@@ -45,16 +45,16 @@
             <div class="grid flex-grow">
                 <h2 class="px-2">Status</h2>
                 <div class="bg-base-200 rounded-box text-sm p-2">
-                    <div><span>Begin month:</span> 30 000 Kč</div>
-                    <div><span>End month:</span> 30 000 Kč</div>
-                    <div><span>End of year:</span> 30 000 Kč</div>
+                    <div><span>Begin month:</span> {{ account.real_balance_start_of_month }}</div>
+                    <div><span>End month:</span> {{ account.real_balance_end_of_month }}</div>
+                    <div><span>End of year:</span> {{ account.real_balance_end_of_year }}</div>
                 </div>
             </div>
             <div class="grid flex-grow">
                 <h2 class="px-2">Expenses this month</h2>
                 <div class="bg-base-200 rounded-box text-sm p-2">
                     <div><span>All:</span> {{ account.this_month_expenses }}</div>
-                    <div><span>Remaining:</span> 30 000 Kč</div>
+                    <div><span>Remaining:</span> {{ account.this_month_remaining_expenses }}</div>
                     <div><span>Next month:</span> {{ account.next_month_expenses }}</div>
                 </div>
             </div>
