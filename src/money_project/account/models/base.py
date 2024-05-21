@@ -67,9 +67,9 @@ class CurrencyModel(models.Model):
         if self.prefix:
             result = self.prefix + result
 
-        result += str(number)
+        result += "{:,.1f}".format(number).replace(",", " ").replace(".0", "")
 
         if self.suffix:
-            result = result + self.suffix
+            result = result + " " + self.suffix
 
         return result

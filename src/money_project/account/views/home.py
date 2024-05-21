@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import pandas as pd
 import plotly.express as px
 from django.views.generic import TemplateView
+from pandas.tseries.offsets import DateOffset
 from plotly.graph_objects import Figure
 
 from ..accounting.balance import get_real_account_balance
@@ -67,10 +68,20 @@ class HomeView(TemplateView):
             day=calendar.monthrange(today.year, today.month)[1]
         )
         previous_month = start_of_month - timedelta(days=1)
+        end_of_year = date.today().replace(
+            day=calendar.monthrange(today.year, 12)[1], month=12
+        )
 
-        all_year_balance = get_real_account_balance(accounts, start_date, end_date)
-        all_expenses_this_month = BaseTransactionModel.objects.build_dataframe_all(
+        all_year_balance = get_real_account_balance(
+            accounts, start_date, end_date
+        ).reset_index()
+        all_transactions_this_month = BaseTransactionModel.objects.build_dataframe_all(
             accounts, start_of_month, end_of_month
+        )
+        all_transactions_next_month = BaseTransactionModel.objects.build_dataframe_all(
+            accounts,
+            (start_of_month + DateOffset(months=1)).date(),
+            (end_of_month + DateOffset(months=1)).date(),
         )
 
         expenses_per_category = get_expenses_per_category(
@@ -95,14 +106,55 @@ class HomeView(TemplateView):
         #       all expenses
         #       remaining expenses
         #       next month expenses
-        accounts_stats = None
+        per_account_next_month_expenses = (
+            all_transactions_next_month.reset_index()
+            .groupby("account_id")[["amount"]]
+            .sum()
+            .to_dict()["amount"]
+        )
+        per_account_this_month_expenses = (
+            all_transactions_this_month.reset_index()
+            .groupby("account_id")[["amount"]]
+            .sum()
+            .to_dict()["amount"]
+        )
 
-        expenses_until_month_end = None
-        incomes_until_month_end = None
+        today_balance = (
+            all_year_balance[all_year_balance.date == today]
+            .set_index("account_id")
+            .to_dict()
+        )
+        # per_account_this_month_remaining_expenses = (
+        #     all_transactions_this_month[all_transactions_this_month.date > today]
+        #     .groupby("account")[["amount"]]
+        #     .sum()
+        # ).to_dict()
+        # per_account_end_of_year_balance = (
+        #     all_year_balance.groupby("account")[["amount"]].last().to_dict()
+        # )
 
         #####################################################
 
-        context["accounts"] = accounts
+        context["accounts"] = [
+            {
+                "model": account,
+                "next_month_expenses": account.currency.format_currency(
+                    per_account_next_month_expenses.get(account.id, 0)
+                ),
+                "this_month_expenses": account.currency.format_currency(
+                    per_account_this_month_expenses.get(account.id, 0)
+                ),
+                "balance_raw": today_balance["balance"].get(account.id, 0),
+                "balance": account.currency.format_currency(
+                    today_balance["balance"].get(account.id, 0)
+                ),
+                "real_balance_raw": today_balance["real_balance"].get(account.id, 0),
+                "real_balance": account.currency.format_currency(
+                    today_balance["real_balance"].get(account.id, 0)
+                ),
+            }
+            for account in accounts
+        ]
 
         context["figure_category"] = build_category_chart(
             expenses_per_category.reset_index(), x="category", y="amount"
@@ -112,12 +164,9 @@ class HomeView(TemplateView):
         )
 
         context["figure_balance"] = build_balance_chart(
-            all_year_balance.reset_index()
-            .groupby("date")[["balance"]]
-            .sum()
-            .reset_index(),
+            all_year_balance.groupby("date")[["real_balance"]].sum().reset_index(),
             "date",
-            "balance",
+            "real_balance",
         )
 
         return context

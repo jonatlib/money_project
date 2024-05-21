@@ -1,7 +1,7 @@
 {% load static %}
 <div class="card w-[35rem] bg-base-100 shadow-xl relative">
     <div class="absolute top-0 right-0">
-        {% for tag in account.tags.all %}
+        {% for tag in account.model.tags.all %}
             <div class="badge badge-outline">{{ tag.name }}</div>
         {% endfor %}
     </div>
@@ -13,7 +13,7 @@
                     <img src="{% static "logo/apple-touch-icon.png" %}"/>
                 </div>
             </div>
-            <h2 class="card-title">{{ account.name }}</h2>
+            <h2 class="card-title">{{ account.model.name }}</h2>
         </div>
 
         <p>TODO description</p>
@@ -22,14 +22,14 @@
             <div class="grid flex-grow">
                 <div class="stat p-0 mt-2">
                     <div class="stat-title">Real state</div>
-                    <div class="stat-value text-2xl">300 000 Kč</div>
+                    <div class="stat-value text-2xl drop-shadow-lg {% if account.real_balance_raw < 0 %}text-error{% endif %}">{{ account.real_balance }}</div>
                     <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
                 </div>
             </div>
             <div class="grid flex-grow">
                 <div class="stat p-0 mt-2">
                     <div class="stat-title">Model state</div>
-                    <div class="stat-value text-2xl">300 000 Kč</div>
+                    <div class="stat-value text-2xl drop-shadow-lg {% if account.balance_raw < 0 %}text-error{% endif %}">{{ account.balance }}</div>
                     <div class="stat-desc">End of last month ↗︎ 400 (22%)</div>
                 </div>
             </div>
@@ -47,9 +47,9 @@
             <div class="grid flex-grow">
                 <h2 class="px-2">Expenses this month</h2>
                 <div class="bg-base-200 rounded-box text-sm p-2">
-                    <div><span>All:</span> 30 000 Kč</div>
+                    <div><span>All:</span> {{ account.this_month_expenses }}</div>
                     <div><span>Remaining:</span> 30 000 Kč</div>
-                    <div><span>Next month:</span> 30 000 Kč</div>
+                    <div><span>Next month:</span> {{ account.next_month_expenses }}</div>
                 </div>
             </div>
         </div>

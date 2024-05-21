@@ -134,8 +134,8 @@ class RegularTransactionManager(BaseTransactionManager):
         self, accounts: list[MoneyAccountModel], start_date: date, end_date: date
     ) -> models.QuerySet:
         return self.all_for_accounts(accounts).filter(
-            (Q(billing_start__gte=start_date) & Q(billing_start__lte=end_date))
-            | (Q(billing_end__gte=start_date) & Q(billing_end__lte=end_date))
+            (Q(billing_start__lte=start_date) & Q(billing_end__gte=start_date))
+            | (Q(billing_start__lte=end_date))
         )
 
 
