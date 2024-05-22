@@ -8,10 +8,12 @@ from .base import TagModel, CurrencyModel
 class MoneyAccountModel(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    description = models.TextField(default="")
+    description = models.TextField(default="", null=True, blank=True)
     currency = models.ForeignKey(CurrencyModel, on_delete=models.RESTRICT)
 
     tags = models.ManyToManyField(TagModel, blank=True)
+    show_in_overview = models.BooleanField(default=True)
+    include_in_statistics = models.BooleanField(default=True)
 
     owner = models.ForeignKey(User, on_delete=models.RESTRICT)
     allowed_users = models.ManyToManyField(

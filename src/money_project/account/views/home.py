@@ -43,7 +43,8 @@ def default_figure_layout(figure: Figure):
 def build_category_chart(df: pd.DataFrame, x: str, y: str) -> str:
     figure = px.bar(df, x=x, y=y, template="none")
     default_figure_layout(figure)
-    return figure.to_html(config={"staticPlot": True}, full_html=False)
+    # return figure.to_html(config={"staticPlot": True}, full_html=False)
+    return figure.to_html(config={}, full_html=False)
 
 
 def build_balance_chart(df: pd.DataFrame, x: str, y: str, **kwargs) -> str:
@@ -168,14 +169,16 @@ class HomeView(TemplateView):
             & (upcoming_events.date <= (today + timedelta(days=10)))
         ]
         upcoming_events["days"] = upcoming_events.date.apply(lambda v: (v - today).days)
-        upcoming_events["formatted_amount"] = upcoming_events[
-            ["account_id", "amount"]
-        ].apply(
-            lambda v: MoneyAccountModel.objects.get(
-                id=v.account_id
-            ).currency.format_currency(v.amount),
-            axis=1,
-        )
+        # FIXME
+        # upcoming_events["formatted_amount"] = upcoming_events[
+        #     "account_id", "amount"
+        # ].apply(
+        #     lambda v: print(v),
+        #     # lambda v: MoneyAccountModel.objects.get(
+        #     #     id=v.account_id
+        #     # ).currency.format_currency(v.amount),
+        #     axis=1,
+        # )
 
         # Balances
         today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
@@ -192,7 +195,7 @@ class HomeView(TemplateView):
             [
                 today_previous_month_balance_df,
                 (((b - a) / b) * 100)
-                .replace([np.inf, -np.inf], 0)
+                .replace([np.inf, -np.inf, np.nan], 0)
                 .applymap(int)
                 .add_suffix("_change"),
             ],
@@ -293,10 +296,14 @@ class HomeView(TemplateView):
         ]
 
         context["figure_category"] = build_category_chart(
-            expenses_per_category.reset_index(), x="category", y="amount"
+            expenses_per_category.reset_index().groupby("category").sum().reset_index(),
+            x="category",
+            y="amount",
         )
         context["figure_tags"] = build_category_chart(
-            expenses_per_tag.reset_index(), x="tags", y="amount"
+            expenses_per_tag.reset_index().groupby("tags").sum().reset_index(),
+            x="tags",
+            y="amount",
         )
 
         context["figure_daily_balance"] = build_balance_chart(

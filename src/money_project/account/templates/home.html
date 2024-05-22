@@ -3,7 +3,9 @@
 {% block content %}
     <div class="flex items-center gap-8 justify-center mt-10">
         {% for account in accounts %}
-            {% include 'components/account.html' with account=account %}
+            {% if account.model.show_in_overview %}
+                {% include 'components/account.html' with account=account %}
+            {% endif %}
         {% endfor %}
     </div>
 

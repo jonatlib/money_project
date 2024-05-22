@@ -44,6 +44,11 @@ class ExtraTransactionModelAdmin(admin.ModelAdmin):
         "target_account",
         "date",
     ]
+    list_editable = [
+        "date",
+        "amount",
+        "category",
+    ]
 
 
 @admin.register(RegularTransactionModel)
