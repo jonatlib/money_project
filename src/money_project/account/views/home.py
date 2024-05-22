@@ -55,15 +55,35 @@ def build_balance_chart(df: pd.DataFrame, x: str, y: str, **kwargs) -> str:
 
 
 def build_balance_waterfall_chart(df: pd.DataFrame, x: str, y: str, base: float) -> str:
-    x_data = df[x]
-    y_data = df[y].shift(-1) - df[y]
+    x_data = df[x].values
+    y_data = df[y].values
 
     figure = go.Figure(
         go.Waterfall(
             x=x_data,
             y=y_data,
             base=base,
-            measure=["relative" for _ in range(len(x_data))],
+            # measure=["relative" for _ in range(len(x_data))],
+        )
+    )
+
+    default_figure_layout(figure)
+    figure.update_layout({"width": 1000})
+    return figure.to_html(full_html=False)
+
+
+def build_balance_waterfall_chart_diff(
+    df: pd.DataFrame, x: str, y: str, base: float
+) -> str:
+    x_data = df[x].values
+    y_data = (df[y].shift(-1) - df[y]).values
+
+    figure = go.Figure(
+        go.Waterfall(
+            x=x_data,
+            y=y_data,
+            base=base,
+            # measure=["relative" for _ in range(len(x_data))],
         )
     )
 
@@ -93,12 +113,22 @@ class HomeView(TemplateView):
             day=calendar.monthrange(today.year, 12)[1], month=12
         )
 
-        all_year_balance = get_real_account_balance(
+        all_year_balance_with_ignored = get_real_account_balance(
             accounts, start_date, end_date
+        ).reset_index()
+        all_year_balance_with_ignored["account"] = (
+            all_year_balance_with_ignored.account_id.apply(
+                lambda v: MoneyAccountModel.objects.get(id=v).name
+            )
+        )
+        # FIXME when this won't return any account it will crash the view
+        all_year_balance = get_real_account_balance(
+            accounts.filter(include_in_statistics=True), start_date, end_date
         ).reset_index()
         all_year_balance["account"] = all_year_balance.account_id.apply(
             lambda v: MoneyAccountModel.objects.get(id=v).name
         )
+
         all_transactions_this_month = BaseTransactionModel.objects.build_dataframe_all(
             accounts, start_of_month, end_of_month
         )
@@ -169,16 +199,15 @@ class HomeView(TemplateView):
             & (upcoming_events.date <= (today + timedelta(days=10)))
         ]
         upcoming_events["days"] = upcoming_events.date.apply(lambda v: (v - today).days)
-        # FIXME
-        # upcoming_events["formatted_amount"] = upcoming_events[
-        #     "account_id", "amount"
-        # ].apply(
-        #     lambda v: print(v),
-        #     # lambda v: MoneyAccountModel.objects.get(
-        #     #     id=v.account_id
-        #     # ).currency.format_currency(v.amount),
-        #     axis=1,
-        # )
+        # FIXME not working when no data on account
+        upcoming_events["formatted_amount"] = upcoming_events[
+            ["account_id", "amount"]
+        ].apply(
+            lambda v: MoneyAccountModel.objects.get(
+                id=v.account_id
+            ).currency.format_currency(v.amount),
+            axis=1,
+        )
 
         # Balances
         today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
@@ -189,12 +218,12 @@ class HomeView(TemplateView):
         today_previous_month_balance_df = all_year_balance[
             all_year_balance.date == previous_month_today
         ].set_index("account_id")
-        a = today_balance_df[["balance", "real_balance"]]
-        b = today_previous_month_balance_df[["balance", "real_balance"]]
+        a = today_previous_month_balance_df[["balance", "real_balance"]]
+        b = today_balance_df[["balance", "real_balance"]]
         today_previous_month_balance_df = pd.concat(
             [
                 today_previous_month_balance_df,
-                (((b - a) / b) * 100)
+                (((a - b) / a) * 100)
                 .replace([np.inf, -np.inf, np.nan], 0)
                 .applymap(int)
                 .add_suffix("_change"),
@@ -296,12 +325,20 @@ class HomeView(TemplateView):
         ]
 
         context["figure_category"] = build_category_chart(
-            expenses_per_category.reset_index().groupby("category").sum().reset_index(),
+            expenses_per_category.reset_index()
+            .groupby("category")
+            .sum()
+            .reset_index()
+            .sort_values(by="amount"),
             x="category",
             y="amount",
         )
         context["figure_tags"] = build_category_chart(
-            expenses_per_tag.reset_index().groupby("tags").sum().reset_index(),
+            expenses_per_tag.reset_index()
+            .groupby("tags")
+            .sum()
+            .reset_index()
+            .sort_values(by="amount"),
             x="tags",
             y="amount",
         )
@@ -312,8 +349,16 @@ class HomeView(TemplateView):
             y="real_balance",
         )
 
-        context["figure_daily_balance_accounts"] = build_balance_chart(
+        context["figure_daily_balance_accounts_not_ignored"] = build_balance_chart(
             all_year_balance[["account", "date", "real_balance"]].reset_index(),
+            x="date",
+            y="real_balance",
+            color="account",
+        )
+        context["figure_daily_balance_accounts"] = build_balance_chart(
+            all_year_balance_with_ignored[
+                ["account", "date", "real_balance"]
+            ].reset_index(),
             x="date",
             y="real_balance",
             color="account",
@@ -321,17 +366,22 @@ class HomeView(TemplateView):
 
         waterfall_balance = all_year_balance.copy()
         waterfall_balance.date = all_year_balance.date.apply(pd.Timestamp)
-        context["figure_balance"] = build_balance_waterfall_chart(
+        waterfall_balance = (
             waterfall_balance.groupby("date")[["real_balance"]]
             .sum()
-            .sort_index()
             .groupby(pd.Grouper(freq="M"))
-            .last()
-            .reset_index(),
+            .agg(first=("real_balance", "first"), last=("real_balance", "last"))
+            .reset_index()
+        )
+        waterfall_balance["diff"] = (
+            waterfall_balance["last"] - waterfall_balance["last"].shift(1)
+        ).fillna(waterfall_balance["last"].iloc[0] - waterfall_balance["first"].iloc[0])
+        context["figure_balance"] = build_balance_waterfall_chart(
+            waterfall_balance,
             "date",
-            "real_balance",
+            "diff",
             # FIXME when moving from previous year
-            base=0,
+            base=all_year_balance.groupby("date").real_balance.sum().iloc[0],
         )
 
         daily_balance_this_month = all_year_balance[
@@ -341,7 +391,7 @@ class HomeView(TemplateView):
         daily_balance_this_month.date = daily_balance_this_month.date.apply(
             pd.Timestamp
         )
-        context["figure_daily_balance_this_month"] = build_balance_waterfall_chart(
+        context["figure_daily_balance_this_month"] = build_balance_waterfall_chart_diff(
             daily_balance_this_month.groupby("date")[["real_balance"]]
             .sum()
             .reset_index(),

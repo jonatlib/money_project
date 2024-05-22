@@ -55,6 +55,11 @@
 
     <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
         <h2>All accounts</h2>
+        {{ figure_daily_balance_accounts_not_ignored | safe }}
+    </div>
+    
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>All accounts</h2>
         {{ figure_daily_balance_accounts | safe }}
     </div>
 
