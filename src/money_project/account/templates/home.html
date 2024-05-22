@@ -10,11 +10,11 @@
     <div class="flex gap-4 w-full mt-10">
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Upcoming expenses</h2>
-            {% include "components/upcoming.html" %}
+            {% include "components/upcoming.html" with events=upcoming_expenses %}
         </div>
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Upcoming incomes</h2>
-            {% include "components/upcoming.html" %}
+            {% include "components/upcoming.html" with events=upcoming_incomes %}
         </div>
     </div>
 
@@ -22,23 +22,38 @@
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3">
             <h2>Expenses per category</h2>
             {{ figure_category | safe }}
+            {# TODO add sankey chart #}
         </div>
         <div class="grid flex-grow bg-base-300 rounded-box place-items-center">
             <h2>Expenses per tag</h2>
             {{ figure_tags | safe }}
+            {# TODO add sankey chart #}
         </div>
     </div>
 
     <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
-        <h2>Money in time [days]</h2>
-        per day chart for all accounts? (maybe way to ignore some accounts)
-        maybe try waterfall chart?
+        <h2>Money in time [months]</h2>
         {{ figure_balance | safe }}
     </div>
 
     <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
-        <h2>Expenses and incomes per month</h2>
+        <h2>Money in time [days]</h2>
+        {{ figure_daily_balance | safe }}
+    </div>
+
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>Money in time this month</h2>
+        {{ figure_daily_balance_this_month | safe }}
+    </div>
+
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>Expenses and incomes this month</h2>
         double chart up and down, maybe per account per month?
+    </div>
+
+    <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
+        <h2>All accounts</h2>
+        per day chart for all accounts? (maybe way to ignore some accounts)
     </div>
 
     {{ tmp | safe }}

@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from django.views.generic import TemplateView
 from pandas.tseries.offsets import DateOffset
 from plotly.graph_objects import Figure
@@ -52,8 +53,19 @@ def build_balance_chart(df: pd.DataFrame, x: str, y: str) -> str:
     return figure.to_html(full_html=False)
 
 
-def build_balance_waterfall_chart(df: pd.DataFrame, x: str, y: str) -> str:
-    figure = px.line(df, x=x, y=y, template="none")
+def build_balance_waterfall_chart(df: pd.DataFrame, x: str, y: str, base: float) -> str:
+    x_data = df[x]
+    y_data = df[y].shift(-1) - df[y]
+
+    figure = go.Figure(
+        go.Waterfall(
+            x=x_data,
+            y=y_data,
+            base=base,
+            measure=["relative" for _ in range(len(x_data))],
+        )
+    )
+
     default_figure_layout(figure)
     figure.update_layout({"width": 1000})
     return figure.to_html(full_html=False)
@@ -152,7 +164,15 @@ class HomeView(TemplateView):
             (upcoming_events.date > today)
             & (upcoming_events.date <= (today + timedelta(days=10)))
         ]
-        context["tmp"] = upcoming_events.to_html()
+        upcoming_events["days"] = upcoming_events.date.apply(lambda v: (v - today).days)
+        upcoming_events["formatted_amount"] = upcoming_events[
+            ["account_id", "amount"]
+        ].apply(
+            lambda v: MoneyAccountModel.objects.get(
+                id=v.account_id
+            ).currency.format_currency(v.amount),
+            axis=1,
+        )
 
         # Balances
         today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
@@ -276,10 +296,49 @@ class HomeView(TemplateView):
             expenses_per_tag.reset_index(), x="tags", y="amount"
         )
 
-        context["figure_balance"] = build_balance_waterfall_chart(
+        context["figure_daily_balance"] = build_balance_chart(
             all_year_balance.groupby("date")[["real_balance"]].sum().reset_index(),
+            x="date",
+            y="real_balance",
+        )
+
+        waterfall_balance = all_year_balance.copy()
+        waterfall_balance.date = all_year_balance.date.apply(pd.Timestamp)
+        context["figure_balance"] = build_balance_waterfall_chart(
+            waterfall_balance.groupby("date")[["real_balance"]]
+            .sum()
+            .sort_index()
+            .groupby(pd.Grouper(freq="M"))
+            .last()
+            .reset_index(),
             "date",
             "real_balance",
+            # FIXME when moving from previous year
+            base=0,
         )
+
+        daily_balance_this_month = all_year_balance[
+            (all_year_balance.date >= start_of_month)
+            & (all_year_balance.date <= end_of_month)
+        ]
+        daily_balance_this_month.date = daily_balance_this_month.date.apply(
+            pd.Timestamp
+        )
+        context["figure_daily_balance_this_month"] = build_balance_waterfall_chart(
+            daily_balance_this_month.groupby("date")[["real_balance"]]
+            .sum()
+            .reset_index(),
+            "date",
+            "real_balance",
+            # FIXME this return balance in first day of month we should return last day of month
+            base=sum(start_of_month_balance["real_balance"].values()),
+        )
+
+        context["upcoming_expenses"] = upcoming_events[
+            upcoming_events.amount < 0
+        ].to_dict(orient="records")
+        context["upcoming_incomes"] = upcoming_events[
+            upcoming_events.amount >= 0
+        ].to_dict(orient="records")
 
         return context

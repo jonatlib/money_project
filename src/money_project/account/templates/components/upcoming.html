@@ -9,19 +9,14 @@
     </tr>
     </thead>
     <tbody>
-    <tr class="hover:bg-primary-content">
-        <td>Main</td>
-        <td>Test</td>
-        <td>22.3.2024 (in 3 days)</td>
-        <td>Home</td>
-        <td>-10 000Kč</td>
-    </tr>
-    <tr class="hover:bg-primary-content">
-        <td>Main</td>
-        <td>Test</td>
-        <td>22.3.2024 (in 4 days)</td>
-        <td>Home</td>
-        <td>-10 000Kč</td>
-    </tr>
+    {% for event in events %}
+        <tr class="hover:bg-primary-content">
+            <td>{{ event.account }}</td>
+            <td>{{ event.name }}</td>
+            <td>{{ event.date|date:"SHORT_DATE_FORMAT" }} (in {{ event.days }} days)</td>
+            <td>{{ event.category }}</td>
+            <td>{{ event.formatted_amount }}</td>
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
