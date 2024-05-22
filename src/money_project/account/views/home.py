@@ -1,5 +1,5 @@
 import calendar
-from datetime import date
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -46,6 +46,13 @@ def build_category_chart(df: pd.DataFrame, x: str, y: str) -> str:
 
 
 def build_balance_chart(df: pd.DataFrame, x: str, y: str) -> str:
+    figure = px.line(df, x=x, y=y, template="none")
+    default_figure_layout(figure)
+    figure.update_layout({"width": 1000})
+    return figure.to_html(full_html=False)
+
+
+def build_balance_waterfall_chart(df: pd.DataFrame, x: str, y: str) -> str:
     figure = px.line(df, x=x, y=y, template="none")
     default_figure_layout(figure)
     figure.update_layout({"width": 1000})
@@ -133,6 +140,19 @@ class HomeView(TemplateView):
             .sum()
             .to_dict()["amount"]
         )
+
+        # Upcoming events
+        upcoming_events = pd.concat(
+            [
+                all_transactions_this_month.set_index(["account_id", "date"]),
+                all_transactions_next_month.set_index(["account_id", "date"]),
+            ]
+        ).reset_index()
+        upcoming_events = upcoming_events[
+            (upcoming_events.date > today)
+            & (upcoming_events.date <= (today + timedelta(days=10)))
+        ]
+        context["tmp"] = upcoming_events.to_html()
 
         # Balances
         today_balance_df = all_year_balance[all_year_balance.date == today].set_index(
@@ -256,7 +276,7 @@ class HomeView(TemplateView):
             expenses_per_tag.reset_index(), x="tags", y="amount"
         )
 
-        context["figure_balance"] = build_balance_chart(
+        context["figure_balance"] = build_balance_waterfall_chart(
             all_year_balance.groupby("date")[["real_balance"]].sum().reset_index(),
             "date",
             "real_balance",
