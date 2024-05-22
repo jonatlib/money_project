@@ -53,7 +53,7 @@
 
     <div class="grid flex-grow bg-base-300 rounded-box place-items-center pt-3 mt-10">
         <h2>All accounts</h2>
-        per day chart for all accounts? (maybe way to ignore some accounts)
+        {{ figure_daily_balance_accounts | safe }}
     </div>
 
     {{ tmp | safe }}

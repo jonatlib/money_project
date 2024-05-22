@@ -46,8 +46,8 @@ def build_category_chart(df: pd.DataFrame, x: str, y: str) -> str:
     return figure.to_html(config={"staticPlot": True}, full_html=False)
 
 
-def build_balance_chart(df: pd.DataFrame, x: str, y: str) -> str:
-    figure = px.line(df, x=x, y=y, template="none")
+def build_balance_chart(df: pd.DataFrame, x: str, y: str, **kwargs) -> str:
+    figure = px.line(df, x=x, y=y, template="none", **kwargs)
     default_figure_layout(figure)
     figure.update_layout({"width": 1000})
     return figure.to_html(full_html=False)
@@ -95,6 +95,9 @@ class HomeView(TemplateView):
         all_year_balance = get_real_account_balance(
             accounts, start_date, end_date
         ).reset_index()
+        all_year_balance["account"] = all_year_balance.account_id.apply(
+            lambda v: MoneyAccountModel.objects.get(id=v).name
+        )
         all_transactions_this_month = BaseTransactionModel.objects.build_dataframe_all(
             accounts, start_of_month, end_of_month
         )
@@ -300,6 +303,13 @@ class HomeView(TemplateView):
             all_year_balance.groupby("date")[["real_balance"]].sum().reset_index(),
             x="date",
             y="real_balance",
+        )
+
+        context["figure_daily_balance_accounts"] = build_balance_chart(
+            all_year_balance[["account", "date", "real_balance"]].reset_index(),
+            x="date",
+            y="real_balance",
+            color="account",
         )
 
         waterfall_balance = all_year_balance.copy()
