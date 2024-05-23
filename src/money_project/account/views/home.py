@@ -363,6 +363,12 @@ class HomeView(TemplateView):
             y="real_balance",
             color="account",
         )
+        context["figure_daily_model_balance_accounts"] = build_balance_chart(
+            all_year_balance_with_ignored[["account", "date", "balance"]].reset_index(),
+            x="date",
+            y="balance",
+            color="account",
+        )
 
         waterfall_balance = all_year_balance.copy()
         waterfall_balance.date = all_year_balance.date.apply(pd.Timestamp)
