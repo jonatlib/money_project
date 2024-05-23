@@ -11,6 +11,8 @@ dependencies = [
     "django-mptt>=0.16.0",
     "django-browser-reload>=1.12.1",
     "plotly>=5.22.0",
+    "django-simple-history>=3.5.0",
+    "django-permissions-auditor>=1.2.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

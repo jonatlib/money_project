@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     # External
     "mptt",
     "django_browser_reload",
+    "permissions_auditor",
+    "simple_history",
     # Our own
     "account",
 ]
@@ -53,7 +55,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Third parties
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "money_project.urls"

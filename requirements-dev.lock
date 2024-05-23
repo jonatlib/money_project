@@ -11,18 +11,24 @@
 asgiref==3.8.1
     # via django
     # via django-browser-reload
+    # via django-simple-history
 black==24.4.2
 click==8.1.7
     # via black
 django==5.0.6
     # via django-browser-reload
     # via django-js-asset
+    # via django-permissions-auditor
     # via money-project
 django-browser-reload==1.12.1
     # via money-project
 django-js-asset==2.2.0
     # via django-mptt
 django-mptt==0.16.0
+    # via money-project
+django-permissions-auditor==1.2.0
+    # via money-project
+django-simple-history==3.5.0
     # via money-project
 mypy-extensions==1.0.0
     # via black
@@ -43,6 +49,8 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.1
     # via pandas
+setuptools==70.0.0
+    # via django-permissions-auditor
 six==1.16.0
     # via python-dateutil
 sqlparse==0.5.0
