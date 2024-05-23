@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 from pandas.tseries.offsets import DateOffset, BDay, BaseOffset
+from simple_history.models import HistoricalRecords
 
 from account.models import TagModel, CategoryModel
 from account.models.account import MoneyAccountModel
@@ -164,6 +165,7 @@ class BaseTransactionModel(models.Model):
         default=None,
         related_name="move_transaction_%(class)ss",
     )
+    history = HistoricalRecords()
 
     objects = BaseTransactionManager
 
@@ -197,6 +199,7 @@ class BaseTransactionModel(models.Model):
 
 class ExtraTransactionModel(BaseTransactionModel):
     date = models.DateField()
+    history = HistoricalRecords()
 
     objects = ExtraTransactionManager()
 
@@ -239,6 +242,8 @@ class RegularTransactionModel(BaseTransactionModel):
     period = models.CharField(max_length=15, choices=Period.choices)
     billing_start = models.DateField()
     billing_end = models.DateField(null=True, blank=True)
+
+    history = HistoricalRecords()
 
     objects = RegularTransactionManager()
 
