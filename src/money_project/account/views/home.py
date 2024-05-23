@@ -48,7 +48,7 @@ def build_category_chart(df: pd.DataFrame, x: str, y: str) -> str:
 
 
 def build_balance_chart(df: pd.DataFrame, x: str, y: str, **kwargs) -> str:
-    figure = px.line(df, x=x, y=y, template="none", **kwargs)
+    figure = px.area(df, x=x, y=y, template="none", **kwargs)
     default_figure_layout(figure)
     figure.update_layout({"width": 1000})
     return figure.to_html(full_html=False)

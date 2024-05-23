@@ -1,5 +1,6 @@
 from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin, TreeRelatedFieldListFilter
+from simple_history.admin import SimpleHistoryAdmin
 
 from account.models import (
     RegularTransactionModel,
@@ -16,7 +17,7 @@ from account.models import (
 
 
 @admin.register(CategoryModel)
-class CategoryModelAdmin(DraggableMPTTAdmin):
+class CategoryModelAdmin(DraggableMPTTAdmin, SimpleHistoryAdmin):
     list_display = [
         "tree_actions",
         "indented_title",
@@ -34,7 +35,7 @@ class CurrencyModelAdmin(admin.ModelAdmin):
 
 
 @admin.register(ExtraTransactionModel)
-class ExtraTransactionModelAdmin(admin.ModelAdmin):
+class ExtraTransactionModelAdmin(SimpleHistoryAdmin):
     list_display = ["__str__"] + [
         field.name for field in ExtraTransactionModel._meta.fields
     ]
@@ -52,7 +53,7 @@ class ExtraTransactionModelAdmin(admin.ModelAdmin):
 
 
 @admin.register(RegularTransactionModel)
-class RegularTransactionModelAdmin(admin.ModelAdmin):
+class RegularTransactionModelAdmin(SimpleHistoryAdmin):
     list_display = ["__str__"] + [
         field.name for field in RegularTransactionModel._meta.fields
     ]
@@ -67,7 +68,7 @@ class RegularTransactionModelAdmin(admin.ModelAdmin):
 
 
 @admin.register(TagModel)
-class TagModelAdmin(DraggableMPTTAdmin):
+class TagModelAdmin(DraggableMPTTAdmin, SimpleHistoryAdmin):
     list_display = [
         "tree_actions",
         "indented_title",
@@ -81,14 +82,14 @@ class TagModelAdmin(DraggableMPTTAdmin):
 
 
 @admin.register(ManualAccountStateModel)
-class ManualAccountStateModelAdmin(admin.ModelAdmin):
+class ManualAccountStateModelAdmin(SimpleHistoryAdmin):
     list_display = ["__str__"] + [
         field.name for field in ManualAccountStateModel._meta.fields
     ]
 
 
 @admin.register(MoneyAccountModel)
-class MoneyAccountModelAdmin(admin.ModelAdmin):
+class MoneyAccountModelAdmin(SimpleHistoryAdmin):
     list_display = ["__str__"] + [
         field.name for field in MoneyAccountModel._meta.fields
     ]
