@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
-from simple_history.models import HistoricalRecords
+from simple_history import register
 
 
 class TagModel(MPTTModel):
@@ -16,7 +16,6 @@ class TagModel(MPTTModel):
     parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
-    history = HistoricalRecords()
 
     # FIXME beware of cycles -  self-parent, handle in save
 
@@ -40,6 +39,9 @@ class TagModel(MPTTModel):
         return self.name
 
 
+register(TagModel)
+
+
 class CategoryModel(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ["name"]
@@ -50,10 +52,12 @@ class CategoryModel(MPTTModel):
     parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
-    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
+
+
+register(CategoryModel)
 
 
 class CurrencyModel(models.Model):
