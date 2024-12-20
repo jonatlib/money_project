@@ -50,6 +50,7 @@ class ExtraTransactionModelAdmin(SimpleHistoryAdmin):
         "amount",
         "category",
     ]
+    save_as = True
 
 
 @admin.register(RegularTransactionModel)

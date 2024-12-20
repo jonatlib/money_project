@@ -99,8 +99,11 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         accounts = MoneyAccountModel.objects.all()
+        # We can't start later then this date, there is a bug somewhere??
         start_date = date(2024, 1, 1)
-        end_date = date(2024, 12, 31)
+        end_date = date(2025, 12, 31)
+        #start_date = date.today() - timedelta(days = 5 * 31)
+        #end_date = date.today() + timedelta(days = 12 * 31)
         period_days = (end_date - start_date).days + 1
 
         today = date.today()
