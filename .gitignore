@@ -14,6 +14,7 @@ wheels/
 
 # Data
 db.sqlite3.bck
+db.sqlite3.bck1
 *.sqlite3
 *.json
 *.csv
