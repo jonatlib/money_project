@@ -18,9 +18,10 @@ class Command(BaseCommand):
         # TODO split ledgers to files...
         ledgers = itertools.chain(
             ledger.extra_transaction_ledgers(extra_transactions),
-            ledger.regular_transaction_ledgers(regular_transactions),
+            # ledger.regular_transaction_ledgers(regular_transactions),
         )
 
         for element in ledgers:
-            self.stdout.write("\n")
             self.stdout.write(str(element))
+            self.stdout.write("\n")
+            self.stdout.write("\n")

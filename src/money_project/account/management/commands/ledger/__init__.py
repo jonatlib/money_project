@@ -1,6 +1,7 @@
-from typing import Iterable
+from typing import Iterable, Optional
 
 from account.management.commands.ledger.base import (
+    AmountTransfer,
     BaseLedger,
     Posting,
     RegularTransactionLedger,
@@ -8,23 +9,63 @@ from account.management.commands.ledger.base import (
 )
 from account.models import (
     BaseTransactionModel,
+    CategoryModel,
     ExtraTransactionModel,
+    MoneyAccountModel,
     RegularTransactionModel,
 )
 
 
-def parse_posting(transaction: BaseTransactionModel) -> list[Posting]:
-    category = transaction.category
-    tags = [t.name for t in transaction.tag.all()]
+def parse_account_name(account: MoneyAccountModel) -> str:
+    return f"Assets:Checking:{account.name}"
 
-    pass
+
+def parse_expense_name(category: Optional[CategoryModel], tags: list[str]) -> str:
+    category_name = category.name if category is not None else ""
+    return "Expenses{}".format(f":{category_name}" if category_name else "")
+
+
+def parse_income_name(
+    name: str, category: Optional[CategoryModel], tags: list[str]
+) -> str:
+    return "Income:Salary:Quantlane"
+
+
+def parse_posting(transaction: BaseTransactionModel) -> Iterable[Posting]:
+    tags = [t.name for t in transaction.tag.all()]
+    currency = transaction.currency.name
+
+    if transaction.counterparty_account is not None:
+        yield Posting(
+            account=parse_account_name(transaction.counterparty_account),
+            amount=AmountTransfer(amount=-transaction.amount, currency=currency),
+            tags=[],
+        )
+    elif transaction.amount < 0:
+        yield Posting(
+            account=parse_expense_name(transaction.category, tags),
+            amount=AmountTransfer(amount=-transaction.amount, currency=currency),
+            tags=[],
+        )
+    else:
+        yield Posting(
+            account=parse_income_name(transaction.name, transaction.category, tags),
+            amount=AmountTransfer(amount=-transaction.amount, currency=currency),
+            tags=[],
+        )
+
+    yield Posting(
+        account=parse_account_name(transaction.target_account),
+        amount=None,
+        tags=[],
+    )
 
 
 def extra_transaction_ledger(
     transaction: ExtraTransactionModel,
 ) -> Iterable[BaseLedger]:
     tags = [t.name for t in transaction.tag.all()]
-    postings = parse_posting(transaction)
+    postings = list(parse_posting(transaction))
 
     yield TransactionLedger(
         id=str(transaction.id),
@@ -40,7 +81,7 @@ def regular_transaction_ledger(
     transaction: RegularTransactionModel,
 ) -> Iterable[BaseLedger]:
     tags = [t.name for t in transaction.tag.all()]
-    postings = parse_posting(transaction)
+    postings = list(parse_posting(transaction))
 
     period = {
         "Yearly": "yearly",
