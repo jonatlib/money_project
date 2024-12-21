@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandParser
 
-from ...accounting.account import get_ideal_account_balance, get_real_account_balance
+from ...accounting.balance import get_ideal_account_balance, get_real_account_balance
 from ...models import MoneyAccountModel
 
 

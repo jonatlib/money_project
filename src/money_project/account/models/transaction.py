@@ -1,16 +1,16 @@
 import abc
 from datetime import date
-from typing import Optional, Iterator
+from typing import Iterator, Optional
 
 import pandas as pd
 from django.db import models
 from django.db.models import Q
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
-from pandas.tseries.offsets import DateOffset, BDay, BaseOffset
+from pandas.tseries.offsets import BaseOffset, BDay, DateOffset
 from simple_history.models import HistoricalRecords
 
-from account.models import TagModel, CategoryModel
+from account.models import CategoryModel, TagModel
 from account.models.account import MoneyAccountModel
 from account.models.base import CurrencyModel
 
@@ -167,7 +167,7 @@ class BaseTransactionModel(models.Model):
     )
     history = HistoricalRecords()
 
-    objects = BaseTransactionManager
+    objects = BaseTransactionManager()
 
     @property
     def currency(self) -> CurrencyModel:
