@@ -2,6 +2,7 @@ import datetime
 import itertools
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from account.models import (
     ExtraTransactionModel,
@@ -15,15 +16,19 @@ class Command(BaseCommand):
     help = "Exports all data to ledger"
 
     def handle(self, *args, **options):
-        extra_transactions = ExtraTransactionModel.objects.all().order_by("date")
-        regular_transactions = RegularTransactionModel.objects.all().order_by(
-            "billing_start"
-        )
-
-        account_manual_states = ManualAccountStateModel.objects.all().order_by("date")
-
         start_date = datetime.date(2024, 1, 1)
-        end_date = datetime.date(2025, 12, 31)
+        end_date = datetime.date(2024, 12, 31)
+
+        extra_transactions = ExtraTransactionModel.objects.filter(
+            Q(date__gte=start_date) & Q(date__lte=end_date)
+        ).order_by("date")
+        regular_transactions = RegularTransactionModel.objects.filter(
+            (Q(billing_start__gte=start_date) & Q(billing_start__lte=end_date))
+        ).order_by("billing_start")
+        account_manual_states = ManualAccountStateModel.objects.filter(
+            Q(date__gte=start_date) & Q(date__lte=end_date)
+        ).order_by("date")
+
         months = [
             datetime.date(
                 start_date.year + (start_date.month + i - 1) // 12,
@@ -48,13 +53,16 @@ class Command(BaseCommand):
         ]
 
         ledgers = itertools.chain(
-            regular,
+            # regular,
             ledger.manual_account_state_ledgers(account_manual_states),
-            ledger.extra_transaction_ledgers(extra_transactions),
             regular_to_transactions,
+            ledger.extra_transaction_ledgers(extra_transactions),
         )
 
-        for element in ledgers:
+        sorted_ledgers = list(ledgers)
+        sorted_ledgers.sort(key=lambda x: x.date)
+
+        for element in sorted_ledgers:
             self.stdout.write(str(element))
             self.stdout.write("\n")
             self.stdout.write("\n")

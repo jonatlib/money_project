@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Iterable, Optional
 
 from account.management.commands.ledger.base import (
@@ -114,7 +115,7 @@ def parse_income_name(
     return "Income:Unknown"
 
 
-def parse_posting(transaction: BaseTransactionModel) -> Iterable[Posting]:
+def parse_source(transaction: BaseTransactionModel) -> Iterable[Posting]:
     tags = [t.name for t in transaction.tag.all()]
     currency = transaction.currency.name
 
@@ -136,6 +137,24 @@ def parse_posting(transaction: BaseTransactionModel) -> Iterable[Posting]:
             amount=AmountTransfer(amount=-transaction.amount, currency=currency),
             tags=[],
         )
+
+
+def parse_posting(transaction: BaseTransactionModel) -> Iterable[Posting]:
+    sources = list(parse_source(transaction))
+
+    # TODO add to parse interest
+    for source in sources:
+        if "CS_credit" in source.account:
+            yield Posting(
+                account="Expenses:Interest:CS_credit",
+                amount=AmountTransfer(
+                    amount=Decimal(1000), currency=transaction.currency.name
+                ),
+                tags=[],
+            )
+            source.amount.amount -= 1000
+
+    yield from sources
 
     yield Posting(
         account=parse_account_name(transaction.target_account),

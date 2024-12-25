@@ -119,6 +119,11 @@ class RegularTransactionLedger(TransactionLedger):
     def generate_transactions(
         self, month: datetime.date
     ) -> Iterable[TransactionLedger]:
+        if self.date > month.replace(
+            day=calendar.monthrange(month.year, month.month)[1]
+        ):
+            return
+
         if self.period == "monthly":
             entity = self.copy()
             date = entity.date.replace(month=month.month, year=month.year)
