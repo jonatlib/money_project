@@ -8,10 +8,17 @@ from simple_history.models import HistoricalRecords
 
 class LedgerName(models.Model):
     id = models.AutoField(primary_key=True)
+    common_name = models.CharField(max_length=255, null=True, blank=True)
     negative_ledger_name = models.CharField(max_length=150)
     positive_ledger_name = models.CharField(max_length=150, null=True, blank=True)
 
     history = HistoricalRecords()
+
+    def __str__(self):
+        if self.common_name:
+            return self.common_name
+
+        return self.negative_ledger_name
 
     def get_name(self, amount: Decimal) -> str:
         if amount <= 0:

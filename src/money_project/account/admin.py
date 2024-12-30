@@ -3,17 +3,23 @@ from mptt.admin import DraggableMPTTAdmin, TreeRelatedFieldListFilter
 from simple_history.admin import SimpleHistoryAdmin
 
 from account.models import (
-    RegularTransactionModel,
-    ExtraTransactionModel,
     CategoryModel,
     CurrencyModel,
-    TagModel,
+    ExtraTransactionModel,
+    LedgerName,
     ManualAccountStateModel,
     MoneyAccountModel,
+    RegularTransactionModel,
+    TagModel,
 )
 
 
 # Register your models here.
+
+
+@admin.register(LedgerName)
+class LedgerNameModelAdmin(admin.ModelAdmin):
+    list_display = ["__str__"] + [field.name for field in LedgerName._meta.fields]
 
 
 @admin.register(CategoryModel)
