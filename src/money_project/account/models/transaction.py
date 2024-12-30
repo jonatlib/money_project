@@ -12,7 +12,7 @@ from simple_history.models import HistoricalRecords
 
 from account.models import CategoryModel, TagModel
 from account.models.account import MoneyAccountModel
-from account.models.base import CurrencyModel
+from account.models.base import CurrencyModel, LedgerName
 
 
 class BaseTransactionManager(models.Manager):
@@ -165,6 +165,9 @@ class BaseTransactionModel(models.Model):
         default=None,
         related_name="move_transaction_%(class)ss",
     )
+
+    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
+
     history = HistoricalRecords()
 
     objects = BaseTransactionManager()
@@ -195,6 +198,23 @@ class BaseTransactionModel(models.Model):
     @abc.abstractmethod
     def __str__(self):
         pass
+
+    def get_ledger(self) -> Optional[str]:
+        if self.ledger_name:
+            return self.ledger_name.get_name(self.amount)
+
+        if self.category.ledger_name:
+            return self.category.ledger_name.get_name(self.amount)
+
+        tags = self.tag.all()
+        ledger_names = [
+            t.ledger_name.get_name(self.amount) for t in tags if t.ledger_name
+        ]
+
+        if len(ledger_names) == 1:
+            return ledger_names[0]
+
+        return None
 
 
 class ExtraTransactionModel(BaseTransactionModel):

@@ -3,6 +3,24 @@ from decimal import Decimal
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from simple_history import register
+from simple_history.models import HistoricalRecords
+
+
+class LedgerName(models.Model):
+    id = models.AutoField(primary_key=True)
+    negative_ledger_name = models.CharField(max_length=150)
+    positive_ledger_name = models.CharField(max_length=150, null=True, blank=True)
+
+    history = HistoricalRecords()
+
+    def get_name(self, amount: Decimal) -> str:
+        if amount <= 0:
+            return self.negative_ledger_name
+        else:
+            if self.positive_ledger_name:
+                return self.positive_ledger_name
+            else:
+                return self.negative_ledger_name
 
 
 class TagModel(MPTTModel):
@@ -16,6 +34,8 @@ class TagModel(MPTTModel):
     parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
+
+    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
 
     # FIXME beware of cycles -  self-parent, handle in save
 
@@ -52,6 +72,8 @@ class CategoryModel(MPTTModel):
     parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
+
+    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
