@@ -31,6 +31,7 @@ class CategoryModelAdmin(DraggableMPTTAdmin, SimpleHistoryAdmin):
         "name",
         "color",
         "parent",
+        "ledger_name",
     ]
     list_display_links = ("indented_title",)
 
@@ -55,6 +56,7 @@ class ExtraTransactionModelAdmin(SimpleHistoryAdmin):
         "date",
         "amount",
         "category",
+        "ledger_name",
     ]
     save_as = True
 
@@ -84,6 +86,7 @@ class TagModelAdmin(DraggableMPTTAdmin, SimpleHistoryAdmin):
         "color",
         "used_for_grouping",
         "parent",
+        "ledger_name",
     ]
     list_display_links = ("indented_title",)
 
