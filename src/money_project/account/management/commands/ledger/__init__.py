@@ -122,6 +122,13 @@ def parse_source(transaction: BaseTransactionModel) -> Iterable[Posting]:
     tags = [t.name for t in transaction.tag.all()]
     currency = transaction.currency.name
 
+    if name := transaction.get_ledger():
+        yield Posting(
+            account=name,
+            amount=AmountTransfer(amount=transaction.amount, currency=currency),
+            tags=[],
+        )
+
     if transaction.counterparty_account is not None:
         yield Posting(
             account=parse_account_name(transaction.counterparty_account),
