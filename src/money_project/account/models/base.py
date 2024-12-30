@@ -42,7 +42,9 @@ class TagModel(MPTTModel):
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
 
-    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
+    ledger_name = models.ForeignKey(
+        LedgerName, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     # FIXME beware of cycles -  self-parent, handle in save
 
@@ -80,7 +82,9 @@ class CategoryModel(MPTTModel):
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
     )
 
-    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
+    ledger_name = models.ForeignKey(
+        LedgerName, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def __str__(self):
         return self.name

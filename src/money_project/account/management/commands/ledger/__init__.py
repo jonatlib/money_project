@@ -37,6 +37,9 @@ def in_category(text: str, category: Optional[CategoryModel]) -> bool:
 
 
 def parse_account_name(account: MoneyAccountModel) -> str:
+    if ledger_name := account.get_ledger():
+        return ledger_name
+
     name = account.name.strip().replace(" ", "_")
     if "portu" in name.lower():
         return "Assets:Investments:Portu"

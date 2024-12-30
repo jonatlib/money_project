@@ -23,7 +23,9 @@ class MoneyAccountModel(models.Model):
         User, related_name="allowed_users", blank=True
     )
 
-    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
+    ledger_name = models.ForeignKey(
+        LedgerName, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     history = HistoricalRecords()
 

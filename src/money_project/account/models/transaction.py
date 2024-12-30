@@ -166,7 +166,9 @@ class BaseTransactionModel(models.Model):
         related_name="move_transaction_%(class)ss",
     )
 
-    ledger_name = models.ForeignKey(LedgerName, on_delete=models.SET_NULL, null=True)
+    ledger_name = models.ForeignKey(
+        LedgerName, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     history = HistoricalRecords()
 
