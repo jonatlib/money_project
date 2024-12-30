@@ -2,7 +2,8 @@ from datetime import date
 
 import pandas as pd
 
-from ..models import BaseTransactionModel, MoneyAccountModel
+from ..models import MoneyAccountModel
+from ..models.transaction import BaseTransactionManager
 
 
 # FIXME implement ignored transactinos?
@@ -11,9 +12,7 @@ from ..models import BaseTransactionModel, MoneyAccountModel
 def get_expenses_per_category(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
-    df = BaseTransactionModel.objects.build_dataframe_all(
-        accounts, start_date, end_date
-    )
+    df = BaseTransactionManager.build_dataframe_all(accounts, start_date, end_date)
     try:
         df = df[df.amount < 0]
     except AttributeError:
@@ -26,9 +25,7 @@ def get_expenses_per_category(
 def get_expenses_per_category_per_month(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
-    df = BaseTransactionModel.objects.build_dataframe_all(
-        accounts, start_date, end_date
-    )
+    df = BaseTransactionManager.build_dataframe_all(accounts, start_date, end_date)
     try:
         df = df[df.amount < 0]
     except AttributeError:
@@ -44,9 +41,7 @@ def get_expenses_per_category_per_month(
 def get_expenses_per_tag(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
-    df = BaseTransactionModel.objects.build_dataframe_all(
-        accounts, start_date, end_date
-    )
+    df = BaseTransactionManager.build_dataframe_all(accounts, start_date, end_date)
     try:
         df = df[df.amount < 0]
     except AttributeError:
@@ -59,9 +54,7 @@ def get_expenses_per_tag(
 def get_expenses_per_tag_per_month(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
-    df = BaseTransactionModel.objects.build_dataframe_all(
-        accounts, start_date, end_date
-    )
+    df = BaseTransactionManager.build_dataframe_all(accounts, start_date, end_date)
     try:
         df = df[df.amount < 0]
     except AttributeError:

@@ -205,8 +205,9 @@ class BaseTransactionModel(models.Model):
         if self.ledger_name:
             return self.ledger_name.get_name(self.amount)
 
-        if name := self.category.get_ledger(self.amount):
-            return name
+        if self.category:
+            if name := self.category.get_ledger(self.amount):
+                return name
 
         tags = self.tag.all()
         ledger_names = [t.get_ledger(self.amount) for t in tags if t.ledger_name]

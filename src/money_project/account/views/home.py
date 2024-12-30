@@ -16,7 +16,8 @@ from ..accounting.expence import (
     get_expenses_per_tag,
     get_expenses_per_tag_per_month,
 )
-from ..models import MoneyAccountModel, BaseTransactionModel
+from ..models import MoneyAccountModel
+from ..models.transaction import BaseTransactionManager
 
 DEFAULT_LAYOUT = {
     "plot_bgcolor": "rgba(0, 0, 0, 0)",
@@ -102,8 +103,8 @@ class HomeView(TemplateView):
         # We can't start later then this date, there is a bug somewhere??
         start_date = date(2024, 1, 1)
         end_date = date(2025, 12, 31)
-        #start_date = date.today() - timedelta(days = 5 * 31)
-        #end_date = date.today() + timedelta(days = 12 * 31)
+        # start_date = date.today() - timedelta(days = 5 * 31)
+        # end_date = date.today() + timedelta(days = 12 * 31)
         period_days = (end_date - start_date).days + 1
 
         today = date.today()
@@ -132,10 +133,10 @@ class HomeView(TemplateView):
             lambda v: MoneyAccountModel.objects.get(id=v).name
         )
 
-        all_transactions_this_month = BaseTransactionModel.objects.build_dataframe_all(
+        all_transactions_this_month = BaseTransactionManager.build_dataframe_all(
             accounts, start_of_month, end_of_month
         )
-        all_transactions_next_month = BaseTransactionModel.objects.build_dataframe_all(
+        all_transactions_next_month = BaseTransactionManager.build_dataframe_all(
             accounts,
             (start_of_month + DateOffset(months=1)).date(),
             (end_of_month + DateOffset(months=1)).date(),

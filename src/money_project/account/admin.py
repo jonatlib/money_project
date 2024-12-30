@@ -43,7 +43,7 @@ class CurrencyModelAdmin(admin.ModelAdmin):
 
 @admin.register(ExtraTransactionModel)
 class ExtraTransactionModelAdmin(SimpleHistoryAdmin):
-    list_display = ["__str__"] + [
+    list_display = ["__str__", "get_ledger"] + [
         field.name for field in ExtraTransactionModel._meta.fields
     ]
     list_filter = [
@@ -63,7 +63,7 @@ class ExtraTransactionModelAdmin(SimpleHistoryAdmin):
 
 @admin.register(RegularTransactionModel)
 class RegularTransactionModelAdmin(SimpleHistoryAdmin):
-    list_display = ["__str__"] + [
+    list_display = ["__str__", "get_ledger"] + [
         field.name for field in RegularTransactionModel._meta.fields
     ]
     list_filter = [

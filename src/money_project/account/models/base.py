@@ -103,6 +103,19 @@ class CategoryModel(MPTTModel):
     def __str__(self):
         return self.name
 
+    def get_ledger(self, amount: Decimal) -> Optional[str]:
+        if self.ledger_name:
+            return self.ledger_name.get_name(amount)
+
+        p = self.parent
+        while p is not None:
+            if name := p.get_ledger(amount):
+                return name
+
+            p = p.parent
+
+        return None
+
 
 register(CategoryModel)
 

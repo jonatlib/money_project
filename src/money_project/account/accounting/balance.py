@@ -2,15 +2,14 @@ from datetime import date
 
 import pandas as pd
 
-from ..models import BaseTransactionModel, MoneyAccountModel, ManualAccountStateModel
+from ..models import ManualAccountStateModel, MoneyAccountModel
+from ..models.transaction import BaseTransactionManager
 
 
 def get_ideal_account_balance(
     accounts: list[MoneyAccountModel], start_date: date, end_date: date
 ) -> pd.DataFrame:
-    df = BaseTransactionModel.objects.build_dataframe_all(
-        accounts, start_date, end_date
-    )
+    df = BaseTransactionManager.build_dataframe_all(accounts, start_date, end_date)
 
     try:
         result = (

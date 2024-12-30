@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Iterable, Optional
 
 from account.management.commands.ledger.base import (
@@ -41,8 +40,8 @@ def parse_account_name(account: MoneyAccountModel) -> str:
         return ledger_name
 
     name = account.name.strip().replace(" ", "_")
-    if "portu" in name.lower():
-        return "Assets:Investments:Portu"
+    # if "portu" in name.lower():
+    #     return "Assets:Investments:Portu"
 
     return f"Assets:Checking:{name}"
 
@@ -53,28 +52,28 @@ def parse_any_name(
     name = name.strip().lower()
     tags_names = [t.lower() for t in tags]
 
-    if in_category("invest", category) and "investown" in name:
-        return "Assets:Investments:Investown"
-
-    if in_category("invest", category) and "portu" in name:
-        return "Assets:Investments:Portu"
-
-    if in_category("invest", category):
-        return "Assets:Investments:Unknown"
-
-    if in_category("debts", category) and "uver" in name:
-        return "Liabilities:Debt:CS_credit"
-
-    if in_category("debts", category) and "hypoteka" in name:
-        return "Liabilities:Debt:Mortgage"
-
-    if in_category("debts", category):
-        return "Liabilities:Debt:Unknown"
-
-    if in_category("insurance", category):
-        return "Expenses:Insurance"
-    if in_category("car", category):
-        return "Expenses:Utilities:Car"
+    # if in_category("invest", category) and "investown" in name:
+    #     return "Assets:Investments:Investown"
+    #
+    # if in_category("invest", category) and "portu" in name:
+    #     return "Assets:Investments:Portu"
+    #
+    # if in_category("invest", category):
+    #     return "Assets:Investments:Unknown"
+    #
+    # if in_category("debts", category) and "uver" in name:
+    #     return "Liabilities:Debt:CS_credit"
+    #
+    # if in_category("debts", category) and "hypoteka" in name:
+    #     return "Liabilities:Debt:Mortgage"
+    #
+    # if in_category("debts", category):
+    #     return "Liabilities:Debt:Unknown"
+    #
+    # if in_category("insurance", category):
+    #     return "Expenses:Insurance"
+    # if in_category("car", category):
+    #     return "Expenses:Utilities:Car"
 
     return None
 
@@ -89,8 +88,8 @@ def parse_expense_name(
     category_name = (category.name if category is not None else "").lower()
     tags_names = [t.lower() for t in tags]
 
-    if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
-        return "Expenses:Tax:Income"
+    # if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
+    #     return "Expenses:Tax:Income"
 
     return "Expenses:Unknown{}".format(
         f":{category_name.replace(" ", "_")}" if category_name else ""
@@ -106,14 +105,14 @@ def parse_income_name(
 
     tags_names = [t.lower() for t in tags]
 
-    if in_category("error", category):
-        return "Equity:Adjustments"
-
-    if "income" in name.lower():
-        return "Income:Salary:Quantlane"
-
-    if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
-        return "Income:Tax:Income"
+    # if in_category("error", category):
+    #     return "Equity:Adjustments"
+    #
+    # if "income" in name.lower():
+    #     return "Income:Salary:Quantlane"
+    #
+    # if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
+    #     return "Income:Tax:Income"
 
     return "Income:Unknown"
 
@@ -122,16 +121,15 @@ def parse_source(transaction: BaseTransactionModel) -> Iterable[Posting]:
     tags = [t.name for t in transaction.tag.all()]
     currency = transaction.currency.name
 
-    if name := transaction.get_ledger():
-        yield Posting(
-            account=name,
-            amount=AmountTransfer(amount=transaction.amount, currency=currency),
-            tags=[],
-        )
-
     if transaction.counterparty_account is not None:
         yield Posting(
             account=parse_account_name(transaction.counterparty_account),
+            amount=AmountTransfer(amount=-transaction.amount, currency=currency),
+            tags=[],
+        )
+    elif name := transaction.get_ledger():
+        yield Posting(
+            account=name,
             amount=AmountTransfer(amount=-transaction.amount, currency=currency),
             tags=[],
         )
@@ -152,17 +150,17 @@ def parse_source(transaction: BaseTransactionModel) -> Iterable[Posting]:
 def parse_posting(transaction: BaseTransactionModel) -> Iterable[Posting]:
     sources = list(parse_source(transaction))
 
-    # TODO add to parse interest
-    for source in sources:
-        if "CS_credit" in source.account:
-            yield Posting(
-                account="Expenses:Interest:CS_credit",
-                amount=AmountTransfer(
-                    amount=Decimal(1000), currency=transaction.currency.name
-                ),
-                tags=[],
-            )
-            source.amount.amount -= 1000
+    # # TODO add to parse interest
+    # for source in sources:
+    #     if "CS_credit" in source.account:
+    #         yield Posting(
+    #             account="Expenses:Interest:CS_credit",
+    #             amount=AmountTransfer(
+    #                 amount=Decimal(1000), currency=transaction.currency.name
+    #             ),
+    #             tags=[],
+    #         )
+    #         source.amount.amount -= 1000
 
     yield from sources
 
