@@ -40,57 +40,13 @@ def parse_account_name(account: MoneyAccountModel) -> str:
         return ledger_name
 
     name = account.name.strip().replace(" ", "_")
-    # if "portu" in name.lower():
-    #     return "Assets:Investments:Portu"
-
     return f"Assets:Checking:{name}"
-
-
-def parse_any_name(
-    name: str, category: Optional[CategoryModel], tags: list[str]
-) -> Optional[str]:
-    name = name.strip().lower()
-    tags_names = [t.lower() for t in tags]
-
-    # if in_category("invest", category) and "investown" in name:
-    #     return "Assets:Investments:Investown"
-    #
-    # if in_category("invest", category) and "portu" in name:
-    #     return "Assets:Investments:Portu"
-    #
-    # if in_category("invest", category):
-    #     return "Assets:Investments:Unknown"
-    #
-    # if in_category("debts", category) and "uver" in name:
-    #     return "Liabilities:Debt:CS_credit"
-    #
-    # if in_category("debts", category) and "hypoteka" in name:
-    #     return "Liabilities:Debt:Mortgage"
-    #
-    # if in_category("debts", category):
-    #     return "Liabilities:Debt:Unknown"
-    #
-    # if in_category("insurance", category):
-    #     return "Expenses:Insurance"
-    # if in_category("car", category):
-    #     return "Expenses:Utilities:Car"
-
-    return None
 
 
 def parse_expense_name(
     name: str, category: Optional[CategoryModel], tags: list[str]
 ) -> str:
-    any_parse = parse_any_name(name, category, tags)
-    if any_parse is not None:
-        return any_parse
-
     category_name = (category.name if category is not None else "").lower()
-    tags_names = [t.lower() for t in tags]
-
-    # if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
-    #     return "Expenses:Tax:Income"
-
     return "Expenses:Unknown{}".format(
         f":{category_name.replace(" ", "_")}" if category_name else ""
     )
@@ -99,21 +55,6 @@ def parse_expense_name(
 def parse_income_name(
     name: str, category: Optional[CategoryModel], tags: list[str]
 ) -> str:
-    any_parse = parse_any_name(name, category, tags)
-    if any_parse is not None:
-        return any_parse
-
-    tags_names = [t.lower() for t in tags]
-
-    # if in_category("error", category):
-    #     return "Equity:Adjustments"
-    #
-    # if "income" in name.lower():
-    #     return "Income:Salary:Quantlane"
-    #
-    # if "tax" in name.lower() or "osvc" in name.lower() or in_category("osvc", category):
-    #     return "Income:Tax:Income"
-
     return "Income:Unknown"
 
 
